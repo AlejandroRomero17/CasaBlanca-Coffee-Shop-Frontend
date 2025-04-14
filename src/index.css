@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+/* 🎨 Design Tokens que generan clases utilitarias personalizadas */
+@theme {
+  --color-coffee-dark: #71534C;
+  --color-gold: #D09E66;
+  --color-gold-dark: #B5783D;
+  --color-beige-light: #FBD5A4;
+
+  --font-sans: 'Outfit', sans-serif;
+  --font-fancy: 'Playfair Display', serif;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 🌐 Estilos base extendidos con clases Tailwind */
+@layer base {
+  body {
+    @apply font-sans text-coffee-dark min-h-screen bg-gradient-to-b from-beige-light to-[#f2c894];
+  }
+
+  h1, h2, h3 {
+    @apply font-fancy;
+  }
+
+  ::selection {
+    @apply bg-gold text-white;
+  }
+}
