@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import floatingCup from "@/assets/images/floating-coffee-cup.png";
+import floatingCup from "@/assets/images/floating-coffee-cup.webp";
 import { Coffee, Menu } from "lucide-react";
 
 const HeroSection = () => {
