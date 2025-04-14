@@ -16,7 +16,7 @@ const OrderButton: React.FC<OrderButtonProps> = ({
   return (
     <Button
       onClick={onClick}
-      className="bg-gold hover:bg-gold-dark text-white font-semibold px-6 py-3 rounded-full transition"
+      className="px-6 py-3 font-semibold text-white transition rounded-full bg-gold hover:bg-gold-dark"
     >
       {icon && <ShoppingCart size={18} className="mr-2" />}
       {label}

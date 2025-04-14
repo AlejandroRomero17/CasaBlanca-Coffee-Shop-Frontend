@@ -5,9 +5,12 @@
     { "path": "./tsconfig.node.json" }
   ],
   "compilerOptions": {
-    "baseUrl": "./src",
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]
-    }
-  }
+      "@/*": ["src/*"],
+      "@components/*": ["./components/*"]
+    },
+    "types": ["node"]
+  },
+  "exclude": ["vite.config.ts"]
 }

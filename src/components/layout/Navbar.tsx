@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Icon } from "@iconify/react";
@@ -15,15 +15,15 @@ const Navbar = () => {
   ];
 
   return (
-    <header className="w-full fixed top-0 left-0 z-50 bg-transparent backdrop-blur-md">
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+    <header className="fixed top-0 left-0 z-50 w-full bg-transparent backdrop-blur-md">
+      <nav className="flex items-center justify-between px-4 py-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         {/* LOGO */}
-        <div className="text-2xl font-fancy font-bold text-black">
+        <div className="text-2xl font-bold text-black font-fancy">
           Casa Blanca
         </div>
 
         {/* NAV LINKS - DESKTOP */}
-        <div className="hidden md:flex space-x-6 items-center">
+        <div className="items-center hidden space-x-6 md:flex">
           {navLinks.map((link) => {
             const isActive = location.pathname === link.href;
             return (
@@ -41,15 +41,15 @@ const Navbar = () => {
         </div>
 
         {/* SEARCH + CART - DESKTOP */}
-        <div className="hidden md:flex items-center space-x-4">
+        <div className="items-center hidden space-x-4 md:flex">
           <Input placeholder="Buscar..." className="w-48 bg-white/70" />
           <Button variant="ghost" size="icon">
-            <Icon icon="mdi:cart-outline" className="text-black w-6 h-6" />
+            <Icon icon="mdi:cart-outline" className="w-6 h-6 text-black" />
           </Button>
         </div>
 
         {/* MENU ICON - MOBILE */}
-        <div className="md:hidden flex items-center">
+        <div className="flex items-center md:hidden">
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             className="text-black focus:outline-none"
@@ -64,7 +64,7 @@ const Navbar = () => {
 
       {/* MOBILE MENU */}
       {menuOpen && (
-        <div className="md:hidden px-6 py-4 bg-beige-light shadow-md space-y-4">
+        <div className="px-6 py-4 space-y-4 shadow-md md:hidden bg-beige-light">
           {navLinks.map((link) => {
             const isActive = location.pathname === link.href;
             return (
@@ -82,7 +82,7 @@ const Navbar = () => {
           })}
           <Input placeholder="Buscar..." className="bg-white/70" />
           <Button variant="ghost" size="icon" className="mt-2">
-            <Icon icon="mdi:cart-outline" className="text-black w-6 h-6" />
+            <Icon icon="mdi:cart-outline" className="w-6 h-6 text-black" />
           </Button>
         </div>
       )}
