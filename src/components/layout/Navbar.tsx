@@ -11,6 +11,7 @@ const Navbar = () => {
   const navLinks = [
     { name: "Inicio", href: "/" },
     { name: "Nuestros productos", href: "/products" },
+    { name: "Bienvenido al lounge", href: "/lounge" },
     { name: "Entrega", href: "/delivery" },
   ];
 
