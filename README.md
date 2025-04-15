@@ -1,18 +1,14 @@
 # CasaBlanca Coffee Shop ☕️
 
-Frontend moderno para la coffee shop premium **CasaBlanca**, desarrollado con **React 19**, **Vite**, **TailwindCSS v4**, y componentes estilizados con **shadcn/ui**.
+Frontend moderno para la coffee shop premium **CasaBlanca**, desarrollado con **React 19**, **Vite**, **TailwindCSS v4**, y componentes estilizados con **shadcn/ui**. Ofrece una experiencia visual elegante con animaciones y diseño adaptado a café, tés y productos gourmet.
 
----
-
-## 🚀 Tecnologías usadas
-
-- [React 19](https://react.dev/)
-- [Vite](https://vitejs.dev/)
-- [TailwindCSS 4](https://tailwindcss.com/)
-- [shadcn/ui](https://ui.shadcn.com/) – Componentes accesibles con diseño moderno
-- [Lucide Icons](https://lucide.dev/)
-- [Framer Motion](https://www.framer.com/motion/) – Animaciones suaves
-- [AOS](https://michalsnik.github.io/aos/) – Animaciones al hacer scroll
+[![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-6-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![shadcn/ui](https://img.shields.io/badge/shadcn/ui-modern%20UI-000000?style=for-the-badge)](https://ui.shadcn.com/)
+[![Framer Motion](https://img.shields.io/badge/Framer_Motion-animations-black?style=for-the-badge&logo=framer&logoColor=white)](https://www.framer.com/motion/)
+[![Atropos](https://img.shields.io/badge/Atropos-3D_effects-6C63FF?style=for-the-badge)](https://atroposjs.com/)
+[![Lucide Icons](https://img.shields.io/badge/Lucide-icons-FFD700?style=for-the-badge&logo=lucide&logoColor=black)](https://lucide.dev/)
 
 ---
 
@@ -22,19 +18,39 @@ Frontend moderno para la coffee shop premium **CasaBlanca**, desarrollado con **
 src/
 ├── assets/              # Imágenes y gráficos
 ├── components/
-│   ├── common/          # Botones, encabezados, etc.
-│   ├── sections/        # Secciones de la landing (Hero, AboutUs, etc.)
+│   ├── common/          # Botones, íconos, inputs
+│   ├── layout/          # Header, footer, navbar
+│   ├── sections/
+│   │   ├── home/        # Secciones de la landing principal
+│   │   ├── lounge/      # Secciones para la página Lounge
+│   │   └── products/    # Secciones para productos y catálogo
 │   └── ui/              # Componentes base (shadcn)
-├── lib/                 # Funciones auxiliares (e.g. className merge)
+├── data/                # Datos estáticos (JSON, arrays)
+├── hooks/               # Custom hooks
+├── lib/                 # Funciones auxiliares
+├── pages/               # Vistas como Home, Lounge, Products
+├── router/              # Definición de rutas
+├── types/               # Tipos globales TypeScript
+├── utils/               # Utilidades varias
 ├── App.tsx
 └── main.tsx
 ```
 
 ---
 
+## 🧭 Páginas disponibles
+
+- `/` – Landing principal
+- `/lounge` – Lounge de té y café (entorno premium)
+- `/products` – Sección moderna de productos
+- `/delivery` – Información de entrega *(provisional)*
+- `/cart` – Carrito de compras *(provisional)*
+
+---
+
 ## 💡 Alias de importación
 
-Para mayor limpieza, se usa el alias `@` apuntando a `src/`.
+El alias `@` apunta a la carpeta `src/` para una importación limpia:
 
 ```ts
 import { Button } from "@/components/ui/button";
@@ -55,15 +71,6 @@ npm run lint      # Linting del código
 
 ---
 
-## ⚙️ Consideraciones técnicas
-
-- `tsconfig.app.json` hereda de `tsconfig.json` para mantener alias y tipos.
-- `vite.config.ts` está excluido del build para evitar errores con ESM (`__dirname`).
-- El proyecto está preparado para usar animaciones tanto con Framer Motion como AOS.
-- Componentes como `Button`, `Input` y más están generados con `shadcn`.
-
----
-
 ## 📦 Instalación
 
 ```bash
@@ -76,7 +83,9 @@ pnpm install
 
 ## 📣 Créditos
 
-Diseño y desarrollo por [@Alejandro](https://github.com/tu-github)
+Diseño y desarrollo por [@AlejandroRomero17](https://github.com/AlejandroRomero17)
+
+Repositorio: [CasaBlanca-Coffee-Shop-Frontend](https://github.com/AlejandroRomero17/CasaBlanca-Coffee-Shop-Frontend)
 
 ---
 
