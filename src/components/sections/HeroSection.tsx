@@ -1,14 +1,10 @@
 // src/components/sections/HeroSection.tsx
 import { motion } from "framer-motion";
-import Atropos from "atropos/react";
-import "atropos/css";
-
 import { Button } from "@/components/ui/button";
 import floatingCup from "@/assets/images/floating-coffee-cup.webp";
 import coffeeGrain from "@/assets/images/coffee-grain.webp";
 import { Coffee, Landmark } from "lucide-react";
 
-// ✅ Tipado corregido para evitar errores de acceso
 const FLOATING_BEANS: {
   top?: string;
   left?: string;
@@ -39,7 +35,6 @@ const HeroSection = () => {
       aria-labelledby="hero-heading"
       className="relative min-h-screen w-full bg-gradient-to-r from-[#dfaf78] via-[#c58c5c] to-[#a46c4a] px-6 py-32 flex flex-col md:flex-row items-center justify-between gap-16 overflow-hidden"
     >
-      {/* ☕ Granos de café flotando */}
       {FLOATING_BEANS.map(({ top, left, right, bottom, delay }, i) => (
         <motion.img
           key={`bean-${i}`}
@@ -50,10 +45,7 @@ const HeroSection = () => {
           decoding="async"
           className="absolute w-12 h-12 pointer-events-none opacity-30 will-change-transform"
           style={{ top, left, right, bottom }}
-          animate={{
-            y: [0, -14, 0],
-            rotate: [0, 10, 0],
-          }}
+          animate={{ y: [0, -14, 0], rotate: [0, 10, 0] }}
           transition={{
             duration: 6,
             repeat: Infinity,
@@ -63,7 +55,7 @@ const HeroSection = () => {
         />
       ))}
 
-      {/* Texto principal */}
+      {/* Texto */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -127,36 +119,23 @@ const HeroSection = () => {
         </motion.div>
       </motion.div>
 
-      {/* ☕ Taza de café animada con efecto 3D */}
+      {/* Imagen de la taza animada */}
       <motion.figure
         animate={{ y: [0, -12, 0] }}
         transition={{
-          y: {
-            duration: 4,
-            repeat: Infinity,
-            ease: "easeInOut",
-          },
+          y: { duration: 4, repeat: Infinity, ease: "easeInOut" },
         }}
-        className="z-10 flex justify-center flex-1"
+        className="z-10 flex justify-center items-center flex-1 min-h-[300px]"
       >
-        <Atropos
-          className="w-[32rem] max-w-full"
-          activeOffset={30}
-          rotateXMax={8}
-          rotateYMax={8}
-          shadow={false}
-          highlight={true}
-        >
-          <img
-            src={floatingCup}
-            alt="Taza de café flotante con vapor artístico"
-            loading="eager"
-            decoding="async"
-            width={512}
-            height={512}
-            className="h-auto transition-transform duration-500 ease-in-out drop-shadow-xl rounded-xl will-change-transform"
-          />
-        </Atropos>
+        <img
+          src={floatingCup}
+          alt="Taza de café flotante"
+          loading="eager"
+          decoding="async"
+          width={512}
+          height={512}
+          className="w-72 md:w-[26rem] lg:w-[30rem] h-auto drop-shadow-xl will-change-transform"
+        />
       </motion.figure>
     </section>
   );
