@@ -1,11 +1,21 @@
+// src/components/sections/HeroSection.tsx
 import { motion } from "framer-motion";
+import Atropos from "atropos/react";
+import "atropos/css";
+
 import { Button } from "@/components/ui/button";
 import floatingCup from "@/assets/images/floating-coffee-cup.webp";
 import coffeeGrain from "@/assets/images/coffee-grain.webp";
 import { Coffee, Landmark } from "lucide-react";
 
-// 🎯 Granitos de café flotando
-const floatingBeans = [
+// ✅ Tipado corregido para evitar errores de acceso
+const FLOATING_BEANS: {
+  top?: string;
+  left?: string;
+  right?: string;
+  bottom?: string;
+  delay: number;
+}[] = [
   { top: "5%", left: "10%", delay: 0 },
   { top: "15%", right: "8%", delay: 1.2 },
   { top: "28%", left: "18%", delay: 0.4 },
@@ -20,7 +30,7 @@ const floatingBeans = [
 const HeroSection = () => {
   const scrollTo = (id: string) => {
     const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: "smooth" });
+    el?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
@@ -30,26 +40,30 @@ const HeroSection = () => {
       className="relative min-h-screen w-full bg-gradient-to-r from-[#dfaf78] via-[#c58c5c] to-[#a46c4a] px-6 py-32 flex flex-col md:flex-row items-center justify-between gap-16 overflow-hidden"
     >
       {/* ☕ Granos de café flotando */}
-      {floatingBeans.map((pos, i) => (
+      {FLOATING_BEANS.map(({ top, left, right, bottom, delay }, i) => (
         <motion.img
-          key={i}
+          key={`bean-${i}`}
           src={coffeeGrain}
-          alt="Grano de café"
+          alt=""
+          aria-hidden="true"
           loading="lazy"
           decoding="async"
           className="absolute w-12 h-12 pointer-events-none opacity-30 will-change-transform"
-          style={{ ...pos }}
-          animate={{ y: [0, -14, 0] }}
+          style={{ top, left, right, bottom }}
+          animate={{
+            y: [0, -14, 0],
+            rotate: [0, 10, 0],
+          }}
           transition={{
             duration: 6,
             repeat: Infinity,
             ease: "easeInOut",
-            delay: pos.delay,
+            delay,
           }}
         />
       ))}
 
-      {/* TEXTO */}
+      {/* Texto principal */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -62,7 +76,7 @@ const HeroSection = () => {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="mb-6 text-4xl font-extrabold leading-snug tracking-wide text-black md:text-6xl font-fancy"
+          className="mb-6 text-4xl font-extrabold leading-snug tracking-wide text-black md:text-6xl lg:text-7xl font-fancy"
         >
           Disfruta tu{" "}
           <span className="text-[#A4471C] italic font-semibold">café</span>
@@ -73,10 +87,11 @@ const HeroSection = () => {
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="max-w-xl mb-10 text-base leading-relaxed md:text-lg text-black/80 md:mb-12"
+          className="max-w-xl mb-10 text-base leading-relaxed md:text-lg lg:text-xl text-black/80 md:mb-12"
         >
-          Comienza tu mañana con nuestras mezclas <strong>premium</strong> y
-          sabores únicos de <strong>Casa Blanca</strong>.
+          Comienza tu mañana con nuestras mezclas{" "}
+          <strong className="font-semibold">premium</strong> y sabores únicos de{" "}
+          <strong className="font-semibold">Casa Blanca</strong>.
         </motion.p>
 
         <motion.div
@@ -87,40 +102,61 @@ const HeroSection = () => {
         >
           <Button
             size="lg"
-            className="bg-[#3B2F2F] text-white hover:bg-[#5a4038] rounded-full px-8 py-4 font-semibold shadow-md hover:shadow-lg transition-all duration-300 flex items-center gap-2"
+            className="bg-[#3B2F2F] text-white hover:bg-[#5a4038] rounded-full px-8 py-4 font-semibold shadow-md hover:shadow-lg transition-all duration-300 flex items-center gap-2 group"
             onClick={() => scrollTo("especial")}
           >
-            <Coffee size={18} /> Descubrir el menú
+            <Coffee
+              size={18}
+              className="transition-transform group-hover:rotate-12"
+            />
+            Descubrir el menú
           </Button>
 
           <Button
             size="lg"
             variant="outline"
-            className="border-[#3B2F2F] text-[#3B2F2F] hover:bg-[#3B2F2F] hover:text-white rounded-full px-8 py-4 font-medium transition-all duration-300 flex items-center gap-2"
+            className="border-[#3B2F2F] text-[#3B2F2F] hover:bg-[#3B2F2F]/90 hover:text-white rounded-full px-8 py-4 font-medium transition-all duration-300 flex items-center gap-2 group"
             onClick={() => scrollTo("about")}
           >
-            <Landmark size={18} /> Bienvenido al lounge
+            <Landmark
+              size={18}
+              className="transition-transform group-hover:scale-110"
+            />
+            Bienvenido al lounge
           </Button>
         </motion.div>
       </motion.div>
 
-      {/* ☕ Taza flotante */}
+      {/* ☕ Taza de café animada con efecto 3D */}
       <motion.figure
         animate={{ y: [0, -12, 0] }}
         transition={{
-          duration: 5,
-          repeat: Infinity,
-          ease: "easeInOut",
+          y: {
+            duration: 4,
+            repeat: Infinity,
+            ease: "easeInOut",
+          },
         }}
         className="z-10 flex justify-center flex-1"
       >
-        <img
-          src={floatingCup}
-          alt="Taza de café flotante con vapor artístico"
-          loading="eager"
-          decoding="async"
-          className="w-[32rem] h-auto drop-shadow-md transition-transform duration-500 ease-in-out will-change-transform"
-        />
+        <Atropos
+          className="w-[32rem] max-w-full"
+          activeOffset={30}
+          rotateXMax={8}
+          rotateYMax={8}
+          shadow={false}
+          highlight={true}
+        >
+          <img
+            src={floatingCup}
+            alt="Taza de café flotante con vapor artístico"
+            loading="eager"
+            decoding="async"
+            width={512}
+            height={512}
+            className="h-auto transition-transform duration-500 ease-in-out drop-shadow-xl rounded-xl will-change-transform"
+          />
+        </Atropos>
       </motion.figure>
     </section>
   );
