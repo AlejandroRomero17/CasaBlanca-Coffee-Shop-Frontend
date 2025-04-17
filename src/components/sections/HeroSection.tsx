@@ -1,9 +1,6 @@
-// src/components/sections/HeroSection.tsx
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Button } from "@/components/ui/button";
-// ⚙️ Importamos el srcset y un placeholder muy pequeño
-import heroSrcSet from "@/assets/images/hero-image.webp?w=400;800;1200&as=srcset";
-import heroPlaceholder from "@/assets/images/hero-image.webp?width=20&format=webp";
+import heroImage from "@/assets/images/hero-image.webp";
 import coffeeGrain from "@/assets/images/coffee-grain.webp";
 import { Coffee, Landmark } from "lucide-react";
 import { useRef } from "react";
@@ -91,6 +88,7 @@ const FLOATING_BEANS = [
     rotate: [0, 10, -8, 0],
   },
 ];
+
 const HeroSection = () => {
   const containerRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
@@ -105,7 +103,6 @@ const HeroSection = () => {
   const scrollTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
- console.log("heroSrcSet:", heroSrcSet);
 
   return (
     <section
@@ -291,26 +288,17 @@ const HeroSection = () => {
           transition={{ type: "spring", stiffness: 300, damping: 10 }}
           className="relative group"
         >
-          <picture>
-            <source
-              type="image/webp"
-              srcSet={heroSrcSet}
-              sizes="(max-width: 640px) 100vw, 50vw"
-            />
-            <img
-              src={heroPlaceholder}
-              srcSet={heroSrcSet}
-              sizes="(max-width: 640px) 100vw, 50vw"
-              loading="eager"
-              decoding="async"
-              width={1024}
-              height={1024}
-              className="w-80 md:w-[46rem] lg:w-[58rem] xl:w-[64rem]
-                         h-auto drop-shadow-[0_25px_40px_rgba(0,0,0,0.3)]
-                         will-change-transform"
-              alt="Taza de café premium en el lounge Casa Blanca"
-            />
-          </picture>
+          <img
+            src={heroImage}
+            loading="eager"
+            decoding="async"
+            width={1024}
+            height={1024}
+            className="w-80 md:w-[46rem] lg:w-[58rem] xl:w-[64rem]
+                       h-auto drop-shadow-[0_25px_40px_rgba(0,0,0,0.3)]
+                       will-change-transform"
+            alt="Taza de café premium en el lounge Casa Blanca"
+          />
           <motion.div
             className="absolute inset-0 rounded-full bg-[#f8e3c8] mix-blend-overlay opacity-0 group-hover:opacity-30 blur-[30px] transition-opacity duration-500"
             initial={{ scale: 0.9 }}

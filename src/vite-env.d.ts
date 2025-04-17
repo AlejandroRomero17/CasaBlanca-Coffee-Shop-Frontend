@@ -1,14 +1,28 @@
 /// <reference types="vite/client" />
+/// <reference types="vite-plugin-image-optimizer/client" />
 
-declare module "*?*" {
+// Tipos para importaciones de imágenes
+declare module "*.webp" {
   const src: string;
   export default src;
 }
-declare module "*.webp?w=*&as=srcset" {
-  const srcset: string;
-  export default srcset;
-}
-declare module "*.webp?width=*&format=*" {
+
+declare module "*.jpg" {
   const src: string;
   export default src;
+}
+
+declare module "*.png" {
+  const src: string;
+  export default src;
+}
+
+// Tipos para Vite
+interface ImportMetaEnv {
+  readonly VITE_APP_TITLE: string;
+  // otras variables de entorno...
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
 }

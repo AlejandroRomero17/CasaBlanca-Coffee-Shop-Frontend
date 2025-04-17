@@ -11,7 +11,10 @@ function App() {
 
   return (
     <>
-      <Navbar onMenuClick={() => setSidebarOpen(true)} />
+      <Navbar
+        isMenuOpen={sidebarOpen}
+        onMenuClick={() => setSidebarOpen((o) => !o)}
+      />
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <Suspense
