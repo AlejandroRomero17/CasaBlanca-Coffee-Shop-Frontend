@@ -15,7 +15,8 @@ const sampleProducts: Product[] = [
   {
     name: "Café Etiopía",
     description: "Notas frutales y aroma floral.",
-    image: "https://placehold.co/400x300?text=Café+Etiopía",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQPb_SE9SxxHNnSUgb694JsSaIqQnZGlpUW6A&s",
     price: "$180 MXN",
   },
   {

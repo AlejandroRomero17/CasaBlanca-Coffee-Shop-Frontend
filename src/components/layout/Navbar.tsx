@@ -1,3 +1,4 @@
+// src/components/layout/Navbar.tsx
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +8,7 @@ import { Link, useLocation } from "react-router-dom";
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
+  const cartCount = 2; // Simulación de 2 productos
 
   const navLinks = [
     { name: "Inicio", href: "/" },
@@ -42,11 +44,17 @@ const Navbar = () => {
         </div>
 
         {/* SEARCH + CART - DESKTOP */}
-        <div className="items-center hidden space-x-4 md:flex">
+        <div className="relative items-center hidden space-x-4 md:flex">
           <Input placeholder="Buscar..." className="w-48 bg-white/70" />
-          <Button variant="ghost" size="icon">
-            <Icon icon="mdi:cart-outline" className="w-6 h-6 text-black" />
-          </Button>
+
+          <Link to="/cart" className="relative">
+            <Button variant="ghost" size="icon">
+              <Icon icon="mdi:cart-outline" className="w-6 h-6 text-black" />
+            </Button>
+            <span className="absolute inline-flex items-center justify-center w-5 h-5 text-xs font-semibold text-white bg-red-600 rounded-full -top-1 -right-1">
+              {cartCount}
+            </span>
+          </Link>
         </div>
 
         {/* MENU ICON - MOBILE */}
@@ -54,6 +62,7 @@ const Navbar = () => {
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             className="text-black focus:outline-none"
+            aria-label="Toggle menu"
           >
             <Icon
               icon={menuOpen ? "mdi:close" : "mdi:menu"}
@@ -65,7 +74,7 @@ const Navbar = () => {
 
       {/* MOBILE MENU */}
       {menuOpen && (
-        <div className="px-6 py-4 space-y-4 shadow-md md:hidden bg-beige-light">
+        <div className="px-6 py-4 space-y-4 shadow-md md:hidden bg-beige-light/80 backdrop-blur-sm">
           {navLinks.map((link) => {
             const isActive = location.pathname === link.href;
             return (
@@ -81,10 +90,20 @@ const Navbar = () => {
               </Link>
             );
           })}
-          <Input placeholder="Buscar..." className="bg-white/70" />
-          <Button variant="ghost" size="icon" className="mt-2">
-            <Icon icon="mdi:cart-outline" className="w-6 h-6 text-black" />
-          </Button>
+          <Input placeholder="Buscar..." className="w-full bg-white/70" />
+
+          <Link
+            to="/cart"
+            onClick={() => setMenuOpen(false)}
+            className="relative inline-block"
+          >
+            <Button variant="ghost" size="icon" className="mt-2">
+              <Icon icon="mdi:cart-outline" className="w-6 h-6 text-black" />
+            </Button>
+            <span className="absolute inline-flex items-center justify-center w-5 h-5 text-xs font-semibold text-white bg-red-600 rounded-full -top-1 -right-1">
+              {cartCount}
+            </span>
+          </Link>
         </div>
       )}
     </header>
