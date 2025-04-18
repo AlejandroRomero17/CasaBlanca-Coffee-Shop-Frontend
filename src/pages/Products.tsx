@@ -1,5 +1,5 @@
 import ProductsHero from "@/components/sections/products/ProductsHero";
-import ProductCategories from "@/components/sections/products/ProductCategories";
+// import ProductCategories from "@/components/sections/products/ProductCategories";
 // import FeaturedProducts from "@/components/sections/products/FeaturedProducts";
 import ProductGrid from "@/components/sections/products/ProductGrid";
 import ProductFilterBar from "@/components/sections/products/ProductFilterBar";
@@ -10,7 +10,7 @@ const Products = () => {
   return (
     <>
       <ProductsHero />
-      <ProductCategories />
+      {/* <ProductCategories /> */}
       <ProductFilterBar />
       {/* <FeaturedProducts /> */}
       <ProductGrid />
