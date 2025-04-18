@@ -1,9 +1,10 @@
+import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 import heroImage from "@/assets/images/hero-image.webp";
 import coffeeGrain from "@/assets/images/coffee-grain.webp";
 import { Coffee, Landmark } from "lucide-react";
-import { useRef } from "react";
 
 const FLOATING_BEANS = [
   {
@@ -91,6 +92,7 @@ const FLOATING_BEANS = [
 
 const HeroSection = () => {
   const containerRef = useRef<HTMLElement>(null);
+  const navigate = useNavigate();
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end start"],
@@ -99,10 +101,6 @@ const HeroSection = () => {
   const y = useTransform(scrollYProgress, [0, 1], [0, 80]);
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0.8]);
   const scale = useTransform(scrollYProgress, [0, 1], [1, 1.05]);
-
-  const scrollTo = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-  };
 
   return (
     <section
@@ -118,21 +116,7 @@ const HeroSection = () => {
         animate={{ opacity: 0.4 }}
         transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
       >
-        <motion.div
-          className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-[#f8e3c8] mix-blend-soft-light blur-[80px]"
-          animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.4, 0.3] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute bottom-1/3 right-1/3 w-48 h-48 rounded-full bg-[#f5d5a8] mix-blend-soft-light blur-[60px]"
-          animate={{ scale: [1, 1.05, 1], opacity: [0.2, 0.3, 0.2] }}
-          transition={{
-            duration: 6,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 2,
-          }}
-        />
+        {/* ... blobs ... */}
       </motion.div>
 
       {/* Floating coffee beans */}
@@ -175,25 +159,24 @@ const HeroSection = () => {
         style={{ opacity }}
       />
 
-      {/* Text content */}
+      {/* Text content with initial+animate */}
       <motion.div
         initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        viewport={{ once: true, margin: "-100px" }}
         className="z-10 flex-1 text-center md:text-left md:pl-24"
       >
         <motion.h1
           id="hero-heading"
           initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
           className="mb-6 text-4xl sm:text-5xl md:text-6xl lg:text-[3.5rem] xl:text-[4.5rem] font-extrabold leading-tight text-black font-fancy"
         >
           <motion.span
             className="block"
             initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
             Disfruta tu{" "}
@@ -201,21 +184,21 @@ const HeroSection = () => {
           <motion.span
             className="relative italic font-semibold inline-block text-[#A4471C]"
             initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
+            animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.3, type: "spring" }}
           >
             <span className="relative z-10">café</span>
             <motion.span
               className="absolute -bottom-2 left-0 w-full h-2 bg-[#A4471C]/20 rounded-full"
               initial={{ scaleX: 0 }}
-              whileInView={{ scaleX: 1 }}
+              animate={{ scaleX: 1 }}
               transition={{ duration: 0.8, delay: 0.5 }}
             />
           </motion.span>
           <motion.span
             className="block"
             initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
             antes de empezar tu día
@@ -224,7 +207,7 @@ const HeroSection = () => {
 
         <motion.p
           initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.5 }}
           className="max-w-xl mb-10 text-lg md:text-xl lg:text-2xl text-black/80"
         >
@@ -234,7 +217,7 @@ const HeroSection = () => {
             <motion.span
               className="absolute bottom-0 left-0 w-full h-1 bg-[#A4471C]/40 -z-0"
               initial={{ scaleX: 0 }}
-              whileInView={{ scaleX: 1 }}
+              animate={{ scaleX: 1 }}
               transition={{ duration: 0.8, delay: 0.6 }}
             />
           </strong>{" "}
@@ -244,7 +227,7 @@ const HeroSection = () => {
             <motion.span
               className="absolute bottom-0 left-0 w-full h-1 bg-[#A4471C]/40 -z-0"
               initial={{ scaleX: 0 }}
-              whileInView={{ scaleX: 1 }}
+              animate={{ scaleX: 1 }}
               transition={{ duration: 0.8, delay: 0.7 }}
             />
           </strong>
@@ -253,14 +236,14 @@ const HeroSection = () => {
 
         <motion.div
           initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.8 }}
           className="flex flex-col items-center gap-4 sm:flex-row"
         >
           <Button
             size="lg"
             className="relative bg-[#3B2F2F] text-white hover:bg-[#5a4038] rounded-full px-8 py-6 font-semibold shadow-lg transition group overflow-hidden"
-            onClick={() => scrollTo("especial")}
+            onClick={() => navigate("/products")}
           >
             <Coffee size={20} className="transition group-hover:rotate-12" />
             <span className="relative z-10">Descubrir el menú</span>
@@ -270,7 +253,7 @@ const HeroSection = () => {
             size="lg"
             variant="outline"
             className="relative border-2 border-[#3B2F2F] text-[#3B2F2F] hover:bg-[#3B2F2F]/90 hover:text-white rounded-full px-8 py-6 font-medium transition group overflow-hidden"
-            onClick={() => scrollTo("about")}
+            onClick={() => navigate("/lounge")}
           >
             <Landmark size={20} className="transition group-hover:scale-110" />
             <span className="relative z-10">Bienvenido al lounge</span>
@@ -278,7 +261,7 @@ const HeroSection = () => {
         </motion.div>
       </motion.div>
 
-      {/* Hero image optimized */}
+      {/* Hero image optimized with hover wrapper and zoom-out on mount */}
       <motion.figure
         className="z-10 flex justify-center items-center flex-1 min-h-[300px] -ml-0 md:-ml-12 lg:-ml-20 xl:-ml-28"
         style={{ y, scale }}
@@ -288,16 +271,17 @@ const HeroSection = () => {
           transition={{ type: "spring", stiffness: 300, damping: 10 }}
           className="relative group"
         >
-          <img
+          <motion.img
             src={heroImage}
+            alt="Taza de café premium en el lounge Casa Blanca"
             loading="eager"
             decoding="async"
             width={1024}
             height={1024}
-            className="w-80 md:w-[46rem] lg:w-[58rem] xl:w-[64rem]
-                       h-auto drop-shadow-[0_25px_40px_rgba(0,0,0,0.3)]
-                       will-change-transform"
-            alt="Taza de café premium en el lounge Casa Blanca"
+            initial={{ scale: 1.2 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 1.2, ease: "easeOut" }}
+            className="w-80 md:w-[46rem] lg:w-[58rem] xl:w-[64rem] h-auto drop-shadow-[0_25px_40px_rgba(0,0,0,0.3)] will-change-transform"
           />
           <motion.div
             className="absolute inset-0 rounded-full bg-[#f8e3c8] mix-blend-overlay opacity-0 group-hover:opacity-30 blur-[30px] transition-opacity duration-500"
