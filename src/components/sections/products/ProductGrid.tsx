@@ -3,6 +3,8 @@ import { motion } from "framer-motion";
 import { ShoppingCart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { fetchProducts } from "@/services/productService";
 
 type Product = {
   name: string;
@@ -11,35 +13,30 @@ type Product = {
   price: string;
 };
 
-const sampleProducts: Product[] = [
-  {
-    name: "Café Etiopía",
-    description: "Notas frutales y aroma floral.",
-    image: "https://placehold.co/400x300?text=Café+Etiopía",
-    price: "$180 MXN",
-  },
-  {
-    name: "Té Matcha Premium",
-    description: "Molido fino, ideal para rituales.",
-    image: "https://placehold.co/400x300?text=Té+Matcha",
-    price: "$220 MXN",
-  },
-  {
-    name: "Croissant artesanal",
-    description: "Hojaldre fresco con mantequilla importada.",
-    image: "https://placehold.co/400x300?text=Croissant",
-    price: "$65 MXN",
-  },
-  {
-    name: "Taza Casa Blanca",
-    description: "Cerámica con acabado mate y logo grabado.",
-    image: "https://placehold.co/400x300?text=Taza",
-    price: "$150 MXN",
-  },
-];
-
 const ProductGrid = () => {
   const navigate = useNavigate();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchProducts()
+      .then((data) => {
+        setProducts(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError("Error conectando con backend: " + err.message);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return <div className="text-center py-10">Cargando productos...</div>;
+  }
+  if (error) {
+    return <div className="text-center py-10 text-red-500">{error}</div>;
+  }
 
   return (
     <section className="bg-[#fefcf9] py-20 px-6 md:px-20 text-center">
@@ -59,7 +56,7 @@ const ProductGrid = () => {
       </motion.div>
 
       <div className="grid max-w-6xl grid-cols-1 gap-10 mx-auto sm:grid-cols-2 lg:grid-cols-4">
-        {sampleProducts.map((product, idx) => (
+        {products.map((product, idx) => (
           <motion.div
             key={product.name}
             initial={{ opacity: 0, y: 20 }}
@@ -86,7 +83,7 @@ const ProductGrid = () => {
               </div>
               <div className="mt-4">
                 <p className="mb-3 font-bold text-coffee-dark">
-                  {product.price}
+                  ${product.price}
                 </p>
                 <Button
                   size="sm"
