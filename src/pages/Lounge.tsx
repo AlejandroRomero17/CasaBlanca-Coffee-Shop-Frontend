@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 import LoungeHero from "@/components/sections/lounge/LoungeHero";
 import LoungeInfo from "@/components/sections/lounge/LoungeInfo";
 import LoungeFeatures from "@/components/sections/lounge/LoungeFeatures";
-import LoungeMenuPreview from "@/components/sections/lounge/LoungeMenuPreview";
+// import LoungeMenuPreview from "@/components/sections/lounge/LoungeMenuPreview";
 import LoungeReservation from "@/components/sections/lounge/LoungeReservation";
 
 const Lounge = () => {
@@ -35,7 +35,7 @@ const Lounge = () => {
       <LoungeHero />
       <LoungeInfo />
       <LoungeFeatures />
-      <LoungeMenuPreview />
+      {/* <LoungeMenuPreview /> */}
       <LoungeReservation />
     </>
   );

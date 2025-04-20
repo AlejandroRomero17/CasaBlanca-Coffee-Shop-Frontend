@@ -1,3 +1,4 @@
 User-agent: *
 Allow: /
-Sitemap: https://casablanca.coffee/sitemap.xml
+
+Sitemap: https://osdems-casa-blanca.netlify.app/sitemap.xml

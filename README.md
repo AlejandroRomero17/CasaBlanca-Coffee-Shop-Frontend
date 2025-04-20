@@ -2,13 +2,15 @@
 
 Frontend moderno para la coffee shop premium **CasaBlanca**, desarrollado con **React 19**, **Vite**, **TailwindCSS v4**, y componentes estilizados con **shadcn/ui**. Ofrece una experiencia visual elegante con animaciones y diseño adaptado a café, tés y productos gourmet.
 
-[![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
-[![Vite](https://img.shields.io/badge/Vite-6-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
-[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![shadcn/ui](https://img.shields.io/badge/shadcn/ui-modern%20UI-000000?style=for-the-badge)](https://ui.shadcn.com/)
-[![Framer Motion](https://img.shields.io/badge/Framer_Motion-animations-black?style=for-the-badge&logo=framer&logoColor=white)](https://www.framer.com/motion/)
-[![Atropos](https://img.shields.io/badge/Atropos-3D_effects-6C63FF?style=for-the-badge)](https://atroposjs.com/)
-[![Lucide Icons](https://img.shields.io/badge/Lucide-icons-FFD700?style=for-the-badge&logo=lucide&logoColor=black)](https://lucide.dev/)
+## 🚀 Tecnologías principales
+
+![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black)
+![Vite](https://img.shields.io/badge/Vite-6-646CFF?style=flat-square&logo=vite&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white)
+![shadcn/ui](https://img.shields.io/badge/shadcn--ui-modern%20UI-000000?style=flat-square)
+![Framer Motion](https://img.shields.io/badge/Framer_Motion-animations-black?style=flat-square&logo=framer&logoColor=white)
+![Lucide Icons](https://img.shields.io/badge/Lucide-icons-FFD700?style=flat-square&logo=lucide&logoColor=black)
+
 
 ---
 
