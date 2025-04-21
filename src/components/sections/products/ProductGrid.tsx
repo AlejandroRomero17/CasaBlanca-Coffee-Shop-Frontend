@@ -5,6 +5,8 @@ import { ShoppingCart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import clsx from "clsx";
 import { fetchProducts } from "@/services/productService";
+import { addToCart } from "@/services/cartService";
+import { useCart } from "@/context/CartContext";
 
 export type Product = {
   id: string;
@@ -30,6 +32,39 @@ const ProductCard = ({
     once: true,
     margin: "0px 0px -100px 0px",
   });
+
+  const { refreshCart, session_id } = useCart();
+
+  const [adding, setAdding] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
+
+  const handleAddToCart = async () => {
+    setAdding(true);
+    try {
+      
+      console.log("DEBUG Producto a agregar:", product);
+     
+      const productId = product.id !== undefined && product.id !== null && product.id !== '' ? product.id : null;
+      if (!productId) {
+       
+        console.warn("Producto sin id válido, no se puede agregar al carrito:", product);
+        setAdding(false);
+        return;
+      }
+      console.log("session_id:", session_id, "product_id:", productId);
+      await addToCart(session_id, {
+        product_id: productId,
+        product_name: product.name,
+        product_image: product.image,
+        product_price: Number(product.price),
+        quantity: 1,
+      });
+      await refreshCart();
+      setAdding(false);
+    } catch (e) {
+      setAdding(false);
+    }
+  };
 
   return (
     <motion.div
@@ -99,19 +134,21 @@ const ProductCard = ({
           >
             <span className="font-medium text-[#3B2F2F]">{product.price}</span>
             <MotionButton
+              disabled={adding}
               size="sm"
               aria-label={`Agregar ${product.name} al carrito`}
               className={clsx(
                 "bg-[#3B2F2F] hover:bg-[#5a4038] text-[#f5e8db] rounded-full",
-                "px-4 py-2 text-sm flex gap-1.5 items-center",
+                "px-4 py-2 text-sm flex gap-1.5 items-center mt-4",
                 "transition-all duration-300 transform hover:scale-105",
-                "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5a4038]"
+                "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5a4038]",
+                adding && "opacity-60 cursor-wait"
               )}
-              onClick={() => navigate(`/product/${product.id}`)}
+              onClick={handleAddToCart}
               whileTap={{ scale: 0.95 }}
             >
               <ShoppingCart size={16} strokeWidth={2} />
-              <span className="hidden sm:inline">Agregar</span>
+              <span className="hidden sm:inline">{adding ? 'Agregando...' : 'Agregar'}</span>
             </MotionButton>
           </motion.div>
         </div>
@@ -120,7 +157,7 @@ const ProductCard = ({
   );
 };
 
-const ProductGrid = () => {
+const ProductGrid = ({ filters = {} }) => {
   const sectionRef = useRef(null);
   const isVisible = useInView(sectionRef, {
     once: true,
@@ -131,7 +168,8 @@ const ProductGrid = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchProducts()
+    setLoading(true);
+    fetchProducts(filters)
       .then((data) => {
         setProducts(data);
         setLoading(false);
@@ -140,7 +178,7 @@ const ProductGrid = () => {
         setError("Error conectando con backend: " + err.message);
         setLoading(false);
       });
-  }, []);
+  }, [filters]);
 
   if (loading) {
     return <div className="text-center py-10">Cargando productos...</div>;

@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Link, useLocation } from "react-router-dom";
 import clsx from "clsx";
 import { Menu, ShoppingCart, X } from "lucide-react";
+import { getSessionId } from "@/utils/session";
+import { useCart } from "../../context/CartContext";
 
 const navLinks = [
   { name: "Inicio", href: "/" },
@@ -21,15 +23,15 @@ interface NavbarProps {
 export function Navbar({ isMenuOpen, onMenuClick }: NavbarProps) {
   const [bounce, setBounce] = useState(false);
   const location = useLocation();
-  const cartCount = 2; // Simulación
+  const { itemCount } = useCart();
 
   useEffect(() => {
-    if (cartCount > 0) {
+    if (itemCount > 0) {
       setBounce(true);
       const timer = setTimeout(() => setBounce(false), 500);
       return () => clearTimeout(timer);
     }
-  }, [cartCount]);
+  }, [itemCount]);
 
   const renderLinks = (onClick?: () => void) => (
     <ul role="menubar" className="flex flex-col md:flex-row md:space-x-6">
@@ -112,7 +114,7 @@ export function Navbar({ isMenuOpen, onMenuClick }: NavbarProps) {
                       : {}
                   }
                 >
-                  {cartCount}
+                  {itemCount}
                 </motion.span>
               </Button>
             </motion.div>

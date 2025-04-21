@@ -5,15 +5,18 @@ import ProductGrid from "@/components/sections/products/ProductGrid";
 import ProductFilterBar from "@/components/sections/products/ProductFilterBar";
 // import MerchBanner from "@/components/sections/products/MerchBanner";
 import SubscriptionCta from "@/components/sections/products/SubscriptionCta";
+import { useState } from "react";
 
 const Products = () => {
+  const [filters, setFilters] = useState({});
+
   return (
     <>
       <ProductsHero />
       {/* <ProductCategories /> */}
-      <ProductFilterBar />
+      <ProductFilterBar filters={filters} setFilters={setFilters} />
       {/* <FeaturedProducts /> */}
-      <ProductGrid />
+      <ProductGrid filters={filters} />
       {/* <MerchBanner /> */}
       <SubscriptionCta />
     </>
