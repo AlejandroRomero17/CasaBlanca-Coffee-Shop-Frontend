@@ -5,10 +5,12 @@
     { "path": "./tsconfig.node.json" }
   ],
   "compilerOptions": {
-    "baseUrl": ".",
+    "baseUrl": "./src",  // 👈 Cambia esto para que "src" sea la raíz de imports
     "paths": {
-      "@/*": ["src/*"],
-      "@components/*": ["./components/*"]
+      "@/*": ["*"],
+      "@components/*": ["components/*"],
+      "@store/*": ["store/*"],
+      "@services/*": ["services/*"]
     },
     "types": ["node"]
   },
