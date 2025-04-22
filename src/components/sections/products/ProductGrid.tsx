@@ -1,19 +1,11 @@
+// src/components/sections/products/ProductGrid.tsx
 import { motion, useInView } from "framer-motion";
 import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import clsx from "clsx";
-import { fetchProducts } from "@/services/productService";
-
-export type Product = {
-  id: string;
-  name: string;
-  description: string;
-  image: string;
-  price: string;
-  category?: string;
-};
+import { Product, fetchProducts } from "@/services/productService";
+import { useCartStore } from "@/store/cartStore";
 
 const MotionButton = motion(Button);
 
@@ -24,12 +16,34 @@ const ProductCard = ({
   product: Product;
   index: number;
 }) => {
-  const navigate = useNavigate();
   const cardRef = useRef(null);
   const isVisible = useInView(cardRef, {
     once: true,
     margin: "0px 0px -100px 0px",
   });
+
+  const addToCart = useCartStore((s) => s.addItem);
+  const [isAdded, setIsAdded] = useState(false);
+
+  const handleAddToCart = () => {
+    if (!product.id) {
+      console.error("❌ Producto sin id:", product);
+      return;
+    }
+
+    console.log("➕ Agregando al carrito:", product.name);
+
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      quantity: 1,
+    });
+
+    setIsAdded(true);
+    setTimeout(() => setIsAdded(false), 2000);
+  };
 
   return (
     <motion.div
@@ -51,10 +65,9 @@ const ProductCard = ({
           "group-hover:shadow-lg group-hover:ring-1 group-hover:ring-[#e9d4ba]/50"
         )}
       >
-        {/* Product Image with zoom effect */}
         <div className="relative overflow-hidden aspect-[4/3]">
           <motion.img
-            src={`${product.image}?auto=format&fit=crop&w=800&q=80`}
+            src={product.image}
             alt={`${product.name} - ${product.description}`}
             className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
             loading="lazy"
@@ -63,15 +76,11 @@ const ProductCard = ({
             animate={isVisible ? { opacity: 1 } : {}}
             transition={{ duration: 0.6, delay: index * 0.1 + 0.2 }}
           />
-          {/* Category badge */}
-          {product.category && (
-            <span className="absolute top-3 right-3 px-2.5 py-1 text-xs font-medium rounded-full bg-[#3B2F2F] text-[#f5e8db]">
-              {product.category}
-            </span>
-          )}
+          <span className="absolute top-3 right-3 px-2.5 py-1 text-xs font-medium rounded-full bg-[#3B2F2F] text-[#f5e8db] capitalize">
+            {product.category}
+          </span>
         </div>
 
-        {/* Product Info */}
         <div className="flex flex-col justify-between p-5 h-[40%]">
           <div>
             <motion.h3
@@ -91,27 +100,33 @@ const ProductCard = ({
               {product.description}
             </motion.p>
           </div>
+
           <motion.div
             className="flex items-center justify-between mt-4"
             initial={{ opacity: 0 }}
             animate={isVisible ? { opacity: 1 } : {}}
             transition={{ duration: 0.4, delay: index * 0.1 + 0.5 }}
           >
-            <span className="font-medium text-[#3B2F2F]">{product.price}</span>
+            <span className="font-medium text-[#3B2F2F]">
+              ${product.price.toFixed(2)}
+            </span>
+
             <MotionButton
               size="sm"
+              onClick={handleAddToCart}
               aria-label={`Agregar ${product.name} al carrito`}
               className={clsx(
-                "bg-[#3B2F2F] hover:bg-[#5a4038] text-[#f5e8db] rounded-full",
-                "px-4 py-2 text-sm flex gap-1.5 items-center",
-                "transition-all duration-300 transform hover:scale-105",
-                "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5a4038]"
+                "rounded-full px-4 py-2 text-sm flex gap-1.5 items-center transition-all duration-300 transform",
+                isAdded
+                  ? "bg-green-600 text-white hover:bg-green-700"
+                  : "bg-[#3B2F2F] hover:bg-[#5a4038] text-[#f5e8db]"
               )}
-              onClick={() => navigate(`/product/${product.id}`)}
               whileTap={{ scale: 0.95 }}
             >
               <ShoppingCart size={16} strokeWidth={2} />
-              <span className="hidden sm:inline">Agregar</span>
+              <span className="hidden sm:inline">
+                {isAdded ? "Agregado" : "Agregar"}
+              </span>
             </MotionButton>
           </motion.div>
         </div>
@@ -120,12 +135,15 @@ const ProductCard = ({
   );
 };
 
-const ProductGrid = () => {
+type Props = { query: string; category: string; priceOrder: string };
+
+const ProductGrid = ({ query, category, priceOrder }: Props) => {
   const sectionRef = useRef(null);
   const isVisible = useInView(sectionRef, {
     once: true,
     margin: "0px 0px -100px 0px",
   });
+
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -133,21 +151,33 @@ const ProductGrid = () => {
   useEffect(() => {
     fetchProducts()
       .then((data) => {
-        setProducts(data);
+        setProducts(data.filter((p) => p.available));
         setLoading(false);
       })
       .catch((err) => {
-        setError("Error conectando con backend: " + err.message);
+        setError(err.message);
         setLoading(false);
       });
   }, []);
 
-  if (loading) {
-    return <div className="text-center py-10">Cargando productos...</div>;
-  }
-  if (error) {
-    return <div className="text-center py-10 text-red-500">{error}</div>;
-  }
+  const filtered = products
+    .filter(
+      (p) =>
+        (!query || p.name.toLowerCase().includes(query.toLowerCase())) &&
+        (!category || p.category === category)
+    )
+    .sort((a, b) =>
+      priceOrder === "asc"
+        ? a.price - b.price
+        : priceOrder === "desc"
+        ? b.price - a.price
+        : 0
+    );
+
+  if (loading)
+    return <div className="py-10 text-center">Cargando productos…</div>;
+  if (error)
+    return <div className="py-10 text-center text-red-500">{error}</div>;
 
   return (
     <section
@@ -155,63 +185,15 @@ const ProductGrid = () => {
       className="bg-[#fefcf9] py-16 sm:py-24 px-4 sm:px-6 lg:px-8"
       aria-labelledby="products-heading"
     >
-      <div className="mx-auto max-w-7xl">
-        {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isVisible ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="mb-12 text-center"
-        >
-          <h2
-            id="products-heading"
-            className="text-3xl font-light tracking-tight text-[#3B2F2F] sm:text-4xl"
-          >
-            <span className="block font-serif italic text-[#3B2F2F]/90">
-              Nuestra
-            </span>
-            <span className="block mt-2 text-4xl font-bold sm:text-5xl">
-              Colección Premium
-            </span>
-          </h2>
-          <motion.p
-            className="max-w-2xl mx-auto mt-4 text-base text-[#3B2F2F]/80 sm:text-lg"
-            initial={{ opacity: 0 }}
-            animate={isVisible ? { opacity: 1 } : {}}
-            transition={{ duration: 0.6, delay: 0.3 }}
-          >
-            Descubre la excelencia en cada detalle con nuestras selecciones
-            cuidadosamente curadas.
-          </motion.p>
-        </motion.div>
-
-        {/* Product Grid */}
-        <motion.div
-          initial="hidden"
-          animate={isVisible ? "visible" : ""}
-          className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4"
-        >
-          {products.map((product, index) => (
-            <ProductCard key={product.id} product={product} index={index} />
-          ))}
-        </motion.div>
-
-        {/* Optional View More Button */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={isVisible ? { opacity: 1 } : {}}
-          transition={{ duration: 0.6, delay: 0.8 }}
-          className="mt-16 text-center"
-        >
-          <Button
-            variant="outline"
-            className="border-[#3B2F2F] text-[#3B2F2F] hover:bg-[#3B2F2F]/10 rounded-full px-8 py-3"
-            onClick={() => (window.location.href = "/products")}
-          >
-            Ver colección completa
-          </Button>
-        </motion.div>
-      </div>
+      <motion.div
+        initial="hidden"
+        animate={isVisible ? "visible" : ""}
+        className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4"
+      >
+        {filtered.map((p, idx) => (
+          <ProductCard key={p.id} product={p} index={idx} />
+        ))}
+      </motion.div>
     </section>
   );
 };

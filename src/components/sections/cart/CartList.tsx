@@ -1,35 +1,34 @@
+import { useEffect } from "react";
+import { useCartStore } from "@/store/cartStore";
 import CartItem from "./CartItem";
 
-export type CartItemType = {
-  id: number;
-  name: string;
-  image: string;
-  quantity: number;
-  price: number;
-};
+const CartList = () => {
+  const items = useCartStore((s) => s.items);
+  const removeItem = useCartStore((s) => s.removeItem);
+  const updateQuantity = useCartStore((s) => s.updateQuantity);
 
-interface CartListProps {
-  items: CartItemType[];
-  onUpdate: (items: CartItemType[]) => void;
-}
+  /* Debug */
+  useEffect(() => console.log("🛒 items:", items), [items]);
 
-const CartList = ({ items, onUpdate }: CartListProps) => {
-  const handleRemove = (id: number) =>
-    onUpdate(items.filter((x) => x.id !== id));
-  const handleQty = (id: number, qty: number) =>
-    onUpdate(items.map((x) => (x.id === id ? { ...x, quantity: qty } : x)));
+  if (items.length === 0) {
+    return (
+      <div className="py-8 text-center text-gray-500">
+        Tu carrito está vacío
+      </div>
+    );
+  }
 
   return (
     <ul className="space-y-4">
-      {items.map((item) => (
+      {items.map((it) => (
         <CartItem
-          key={item.id}
-          image={item.image}
-          title={item.name}
-          price={item.price}
-          quantity={item.quantity}
-          onRemove={() => handleRemove(item.id)}
-          onQuantityChange={(q) => handleQty(item.id, q)}
+          key={it.id}
+          image={it.image}
+          title={it.name}
+          price={it.price}
+          quantity={it.quantity}
+          onRemove={() => removeItem(it.id)}
+          onQuantityChange={(q) => updateQuantity(it.id, q)}
         />
       ))}
     </ul>
