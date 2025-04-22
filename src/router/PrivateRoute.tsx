@@ -5,7 +5,7 @@ export default function PrivateRoute() {
   const token = useAuthStore((state) => state.token);
 
   if (!token) {
-    return <Navigate to="/auth/login" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   return <Outlet />;

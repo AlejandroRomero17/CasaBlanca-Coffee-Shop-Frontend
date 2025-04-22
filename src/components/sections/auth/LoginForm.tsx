@@ -57,8 +57,7 @@ export default function LoginForm() {
         position: "top-center",
       });
       setTimeout(() => navigate("/"), 1000);
-    } catch (error) {
-      const err = error as Error;
+    } catch {
       toast.error("Credenciales incorrectas", {
         description: "Verifica tu correo y contraseña",
         position: "top-center",

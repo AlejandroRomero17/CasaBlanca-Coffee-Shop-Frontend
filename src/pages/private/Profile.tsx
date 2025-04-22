@@ -32,7 +32,7 @@ export default function ProfilePage() {
       } catch (err) {
         console.error("Error:", err);
         logout();
-        navigate("/auth/login");
+        navigate("/login");
       } finally {
         setLoading(false);
       }
@@ -66,7 +66,7 @@ export default function ProfilePage() {
         variant="destructive"
         onClick={() => {
           logout();
-          navigate("/auth/login");
+          navigate("/login");
         }}
       >
         Cerrar sesión
