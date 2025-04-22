@@ -66,6 +66,8 @@ const timeSlots = [
   "9:00 PM",
 ];
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function LoungeReservation() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -80,14 +82,14 @@ export default function LoungeReservation() {
     },
   });
 
-  // Watch form values for real-time preview
+  
   const watchedValues = useWatch({
     control: form.control,
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      // Validate required fields manually for better toast feedback
+      
       if (
         !values.fullName ||
         !values.email ||
@@ -102,8 +104,29 @@ export default function LoungeReservation() {
         return;
       }
 
-      await new Promise((r) => setTimeout(r, 1500));
+      
+      const payload = {
+        nombre_completo: values.fullName,
+        correo_electronico: values.email,
+        fecha_visita: values.date.toISOString().split('T')[0],
+        hora_visita: values.time,
+        numero_personas: values.guests,
+        notas_adicionales: values.notes || null,
+        telefono: values.phone 
+      };
 
+     
+      const response = await fetch(`${API_URL}/api/reservaciones`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        throw new Error("Error al guardar la reservación");
+      }
+
+  
       toast.success(
         <div className="flex items-start gap-3">
           <Check className="w-5 h-5 mt-0.5 text-green-500" />
