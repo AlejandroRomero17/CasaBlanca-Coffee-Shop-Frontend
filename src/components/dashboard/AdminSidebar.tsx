@@ -1,65 +1,91 @@
-// src/components/admin/AdminSidebar.tsx
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { useSidebarStore } from "@/store/sidebarStore";
 import { Separator } from "@/components/ui/separator";
 import {
   LayoutDashboard,
   Package,
   DollarSign,
   ShoppingBag,
-} from "lucide-react"; // Íconos elegantes
+  X,
+} from "lucide-react";
 
 const links = [
-  {
-    name: "Resumen",
-    href: "/admin",
-    icon: <LayoutDashboard className="w-5 h-5" />,
-  },
-  {
-    name: "Productos",
-    href: "/admin/products",
-    icon: <Package className="w-5 h-5" />,
-  },
-  {
-    name: "Ventas",
-    href: "/admin/sales",
-    icon: <DollarSign className="w-5 h-5" />,
-  },
-  {
-    name: "Pedidos",
-    href: "/admin/orders",
-    icon: <ShoppingBag className="w-5 h-5" />,
-  },
+  { name: "Resumen", href: "/admin", icon: LayoutDashboard },
+  { name: "Productos", href: "/admin/products", icon: Package },
+  { name: "Ventas", href: "/admin/sales", icon: DollarSign },
+  { name: "Pedidos", href: "/admin/orders", icon: ShoppingBag },
 ];
 
 const AdminSidebar = () => {
   const location = useLocation();
+  const isSidebarOpen = useSidebarStore((s) => s.isSidebarOpen);
+  const isCollapsed = useSidebarStore((s) => s.isCollapsed);
+  const toggleSidebar = useSidebarStore((s) => s.toggleSidebar);
+  const closeSidebar = useSidebarStore((s) => s.closeSidebar);
 
   return (
-    <aside className="w-64 h-screen bg-[#3B2F2F] text-white flex flex-col p-6">
-      <h2 className="mb-6 text-lg font-bold">Casa Blanca Admin</h2>
-      <nav className="flex flex-col gap-2">
-        {links.map((link) => {
-          const isActive = location.pathname === link.href;
-          return (
-            <Link
-              key={link.href}
-              to={link.href}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                "hover:bg-[#523d36]",
-                isActive && "bg-[#523d36]"
-              )}
-            >
-              {link.icon}
-              {link.name}
-            </Link>
-          );
-        })}
-      </nav>
-      <Separator className="my-6 bg-white/20" />
-      <p className="text-sm text-white/70">Panel de administración</p>
-    </aside>
+    <>
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/40 sm:hidden"
+          onClick={closeSidebar}
+        />
+      )}
+
+      <aside
+        className={cn(
+          "h-full bg-white text-black shadow-md transition-all duration-300",
+          "w-64 sm:relative sm:block hidden",
+          isCollapsed ? "md:w-20" : "md:w-64"
+        )}
+      >
+        <div className="flex items-center justify-between px-4 py-4 sm:py-6 sm:px-6">
+          {!isCollapsed && (
+            <h2 className="text-lg font-bold">Casa Blanca Admin</h2>
+          )}
+          <button
+            className="p-2 text-black sm:hidden hover:text-gray-600"
+            onClick={toggleSidebar}
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <nav className="flex flex-col gap-2 px-2 sm:px-4">
+          {links.map(({ name, href, icon: Icon }) => {
+            const isActive = location.pathname === href;
+            return (
+              <Link
+                key={href}
+                to={href}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                  "hover:bg-gray-100",
+                  isActive && "bg-gray-100 font-semibold",
+                  isCollapsed && "justify-center px-0"
+                )}
+                onClick={() => {
+                  if (window.innerWidth < 640) closeSidebar();
+                }}
+              >
+                <Icon className="w-5 h-5" />
+                {!isCollapsed && name}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {!isCollapsed && (
+          <>
+            <Separator className="mx-6 my-6 bg-gray-300" />
+            <p className="px-6 pb-6 text-sm text-gray-500">
+              Panel de administración
+            </p>
+          </>
+        )}
+      </aside>
+    </>
   );
 };
 

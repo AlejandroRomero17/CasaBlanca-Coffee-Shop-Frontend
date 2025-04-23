@@ -1,21 +1,14 @@
 import { useEffect, useState } from "react";
 import { getProfile } from "@/services/authService";
-import { getOrdersByUser } from "@/services/orderService";
+import { getProfileOrders } from "@/services/orderService"; // Cambiado a getProfileOrders
 import { useAuthStore } from "@store/authStore";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-
-type Order = {
-  id: string;
-  total: number;
-  status: string;
-  payment_method: string;
-  created_at: string;
-};
+import { ProfileOrder } from "@/types/order"; // Importamos el tipo específico
 
 export default function ProfilePage() {
   const { user, setUser, logout } = useAuthStore();
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<ProfileOrder[]>([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -27,7 +20,7 @@ export default function ProfilePage() {
           const res = await getProfile();
           setUser(res);
         }
-        const ordersData = await getOrdersByUser();
+        const ordersData = await getProfileOrders(); // Usamos la nueva función
         setOrders(ordersData);
       } catch (err) {
         console.error("Error:", err);
@@ -72,7 +65,6 @@ export default function ProfilePage() {
         Cerrar sesión
       </Button>
 
-      {/* 👇 Historial de órdenes */}
       <div className="pt-8 border-t">
         <h2 className="mb-4 text-xl font-semibold">Mis órdenes</h2>
         {orders.length === 0 ? (
@@ -83,7 +75,7 @@ export default function ProfilePage() {
           <ul className="space-y-4">
             {orders.map((order) => (
               <li key={order.id} className="p-4 border rounded-md shadow-sm">
-                <p className="font-medium">Total: ${order.total}</p>
+                <p className="font-medium">Total: ${order.total.toFixed(2)}</p>
                 <p>Estado: {order.status}</p>
                 <p>Método de pago: {order.payment_method}</p>
                 <p className="text-sm text-muted-foreground">

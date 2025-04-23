@@ -6,8 +6,8 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import clsx from "clsx";
 import { Menu, ShoppingCart, X } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
-import { fetchProducts, Product } from "@/services/productService";
-
+import { fetchProducts } from "@/services/productService";
+import { Product } from "@/types/product";
 const navLinks = [
   { name: "Inicio", href: "/" },
   { name: "Nuestros productos", href: "/products" },

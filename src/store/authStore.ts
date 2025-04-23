@@ -1,30 +1,49 @@
+// src/store/authStore.ts
 import { create } from "zustand";
 
-interface User {
+/**
+ * Tipado centralizado del usuario.
+ * Incluye `avatarUrl` opcional para la foto de perfil.
+ */
+export interface User {
   id: string;
   name: string;
   email: string;
   role: "customer" | "admin";
+  avatarUrl?: string; // URL opcional del avatar
 }
 
 interface AuthState {
   user: User | null;
   token: string | null;
-  setUser: (user: User) => void;
-  setToken: (token: string) => void;
+  setUser: (user: User | null) => void;
+  setToken: (token: string | null) => void;
   logout: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
-  token: localStorage.getItem("token"),
+  token: typeof window !== "undefined" ? localStorage.getItem("token") : null,
+
   setUser: (user) => set({ user }),
+
   setToken: (token) => {
-    localStorage.setItem("token", token);
+    if (typeof window === "undefined") {
+      set({ token });
+      return;
+    }
+    if (token) {
+      localStorage.setItem("token", token);
+    } else {
+      localStorage.removeItem("token");
+    }
     set({ token });
   },
+
   logout: () => {
-    localStorage.removeItem("token");
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("token");
+    }
     set({ user: null, token: null });
   },
 }));

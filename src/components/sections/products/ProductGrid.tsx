@@ -4,7 +4,8 @@ import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart } from "lucide-react";
 import clsx from "clsx";
-import { Product, fetchProducts } from "@/services/productService";
+import { fetchProducts } from "@/services/productService";
+import { Product } from "@/types/product";
 import { useCartStore } from "@/store/cartStore";
 
 const MotionButton = motion(Button);

@@ -1,4 +1,3 @@
-// src/store/cartStore.ts
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -11,7 +10,9 @@ export type CartItem = {
 };
 
 type CartStore = {
+  sessionId: string;
   items: CartItem[];
+  setSessionId: (id: string) => void;
   addItem: (item: CartItem) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, qty: number) => void;
@@ -21,14 +22,15 @@ type CartStore = {
 export const useCartStore = create<CartStore>()(
   persist(
     (set) => ({
+      sessionId: localStorage.getItem("session_id") || generateSessionId(),
       items: [],
 
-      addItem: (item) => {
-        if (!item.id) {
-          console.error("❌ addItem -> item sin id:", item);
-          return;
-        }
+      setSessionId: (id) => {
+        localStorage.setItem("session_id", id);
+        set({ sessionId: id });
+      },
 
+      addItem: (item) => {
         set((state) => {
           const found = state.items.find((i) => i.id === item.id);
           return found
@@ -44,9 +46,7 @@ export const useCartStore = create<CartStore>()(
       },
 
       removeItem: (id) =>
-        set((state) => ({
-          items: state.items.filter((i) => i.id !== id),
-        })),
+        set((state) => ({ items: state.items.filter((i) => i.id !== id) })),
 
       updateQuantity: (id, qty) =>
         set((state) => ({
@@ -57,8 +57,10 @@ export const useCartStore = create<CartStore>()(
 
       replaceItems: (items) => set({ items }),
     }),
-    {
-      name: "cart-storage", // clave del localStorage
-    }
+    { name: "cart-storage" } // Persistir en localStorage
   )
 );
+
+const generateSessionId = () => {
+  return `session-${Math.random().toString(36).substr(2, 9)}`;
+};

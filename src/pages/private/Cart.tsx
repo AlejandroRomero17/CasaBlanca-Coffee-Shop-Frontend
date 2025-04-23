@@ -1,4 +1,4 @@
-// src/pages/Cart.tsx
+// src/pages/pivate/Cart.tsx
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import { useEffect } from "react";

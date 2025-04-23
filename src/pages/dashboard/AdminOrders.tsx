@@ -1,10 +1,10 @@
+// import OrdersTable from "@/components/dashboard/orders/OrdersTable";
+import OrdersTable from "@/components/dashboard/orders/OrdersTable";
+
 const AdminOrders = () => {
   return (
-    <div>
-      <h1 className="text-2xl font-bold">Pedidos</h1>
-      <p className="mt-2 text-gray-600">
-        Visualiza y gestiona los pedidos recientes.
-      </p>
+    <div className="p-6 space-y-6">
+      <OrdersTable />
     </div>
   );
 };
