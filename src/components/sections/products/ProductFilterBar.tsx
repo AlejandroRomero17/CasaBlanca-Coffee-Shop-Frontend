@@ -11,13 +11,12 @@ import {
 } from "@/components/ui/select";
 import { ChevronDown, Search, X } from "lucide-react";
 
-
-interface ProductFilters {
+export type ProductFilters = {
   search?: string;
   category?: string;
   priceOrder?: string;
   sort?: string;
-}
+};
 
 interface ProductFilterBarProps {
   filters: ProductFilters;
@@ -32,11 +31,14 @@ const categoryLabels: Record<string, string> = {
   merch: "Merchandising",
 };
 
-const ProductFilterBar: React.FC<ProductFilterBarProps> = ({ filters, setFilters }) => {
-  const [query, setQuery] = useState(filters.search || "");
-  const [category, setCategory] = useState(filters.category || "");
-  const [priceOrder, setPriceOrder] = useState(filters.priceOrder || "");
-  const [recent, setRecent] = useState(filters.sort === "recent");
+const ProductFilterBar: React.FC<ProductFilterBarProps> = ({ filters = {}, setFilters }) => {
+  if (typeof setFilters !== 'function') {
+    throw new Error("ProductFilterBar: setFilters prop must be a function");
+  }
+  const [query, setQuery] = useState(filters?.search || "");
+  const [category, setCategory] = useState(filters?.category || "");
+  const [priceOrder, setPriceOrder] = useState(filters?.priceOrder || "");
+  const [recent, setRecent] = useState(filters?.sort === "recent");
 
   useEffect(() => {
     setFilters({

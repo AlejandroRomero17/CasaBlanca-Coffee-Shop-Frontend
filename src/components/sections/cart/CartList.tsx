@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useCartStore } from "@/store/cartStore";
 import CartItem from "./CartItem";
 import { deleteFromCart, updateCartQty, fetchCart } from '../../../services/cartService';
 import { getSessionId } from '../../../utils/session';
@@ -56,7 +58,7 @@ const CartList = ({ items, onUpdate, refreshCart }: CartListProps) => {
 
   return (
     <ul className="space-y-4">
-      {items.map((item) => (
+      {items.map((it) => (
         <CartItem
           key={item.id_cart_temp ?? item.product_id}
           image={item.product_image || "https://placehold.co/120x120?text=Sin+Imagen"}

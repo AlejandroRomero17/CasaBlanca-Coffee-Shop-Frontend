@@ -1,8 +1,8 @@
+// src/components/sections/products/ProductGrid.tsx
 import { motion, useInView } from "framer-motion";
 import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import clsx from "clsx";
 import { fetchProducts } from "@/services/productService";
 import { addToCart } from "@/services/cartService";
@@ -15,6 +15,7 @@ export type Product = {
   image: string;
   price: string;
   category?: string;
+  available?: boolean;
 };
 
 const MotionButton = motion(Button);
@@ -26,7 +27,6 @@ const ProductCard = ({
   product: Product;
   index: number;
 }) => {
-  const navigate = useNavigate();
   const cardRef = useRef(null);
   const isVisible = useInView(cardRef, {
     once: true,
@@ -86,10 +86,9 @@ const ProductCard = ({
           "group-hover:shadow-lg group-hover:ring-1 group-hover:ring-[#e9d4ba]/50"
         )}
       >
-        {/* Product Image with zoom effect */}
         <div className="relative overflow-hidden aspect-[4/3]">
           <motion.img
-            src={`${product.image}?auto=format&fit=crop&w=800&q=80`}
+            src={product.image}
             alt={`${product.name} - ${product.description}`}
             className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
             loading="lazy"
@@ -98,15 +97,11 @@ const ProductCard = ({
             animate={isVisible ? { opacity: 1 } : {}}
             transition={{ duration: 0.6, delay: index * 0.1 + 0.2 }}
           />
-          {/* Category badge */}
-          {product.category && (
-            <span className="absolute top-3 right-3 px-2.5 py-1 text-xs font-medium rounded-full bg-[#3B2F2F] text-[#f5e8db]">
-              {product.category}
-            </span>
-          )}
+          <span className="absolute top-3 right-3 px-2.5 py-1 text-xs font-medium rounded-full bg-[#3B2F2F] text-[#f5e8db] capitalize">
+            {product.category}
+          </span>
         </div>
 
-        {/* Product Info */}
         <div className="flex flex-col justify-between p-5 h-[40%]">
           <div>
             <motion.h3
@@ -126,16 +121,21 @@ const ProductCard = ({
               {product.description}
             </motion.p>
           </div>
+
           <motion.div
             className="flex items-center justify-between mt-4"
             initial={{ opacity: 0 }}
             animate={isVisible ? { opacity: 1 } : {}}
             transition={{ duration: 0.4, delay: index * 0.1 + 0.5 }}
           >
-            <span className="font-medium text-[#3B2F2F]">{product.price}</span>
+            <span className="font-medium text-[#3B2F2F]">
+              ${product.price.toFixed(2)}
+            </span>
+
             <MotionButton
               disabled={adding}
               size="sm"
+              onClick={handleAddToCart}
               aria-label={`Agregar ${product.name} al carrito`}
               className={clsx(
                 "bg-[#3B2F2F] hover:bg-[#5a4038] text-[#f5e8db] rounded-full",
@@ -157,12 +157,13 @@ const ProductCard = ({
   );
 };
 
-const ProductGrid = ({ filters = {} }) => {
+const ProductGrid = ({ filters = {}, query = "", category = "", priceOrder = "" }) => {
   const sectionRef = useRef(null);
   const isVisible = useInView(sectionRef, {
     once: true,
     margin: "0px 0px -100px 0px",
   });
+
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -171,21 +172,40 @@ const ProductGrid = ({ filters = {} }) => {
     setLoading(true);
     fetchProducts(filters)
       .then((data) => {
-        setProducts(data);
+        // Depura la estructura de data
+        console.log("Productos recibidos:", data);
+        let productsArray: Product[] = [];
+        if (Array.isArray(data)) {
+          productsArray = data as Product[];
+        } else if (data && Array.isArray((data as any).products)) {
+          productsArray = (data as { products: Product[] }).products;
+        }
+        setProducts(productsArray.filter((p: Product) => p.available !== false));
         setLoading(false);
       })
       .catch((err) => {
-        setError("Error conectando con backend: " + err.message);
+        setError(err.message);
         setLoading(false);
       });
   }, [filters]);
 
-  if (loading) {
-    return <div className="text-center py-10">Cargando productos...</div>;
-  }
-  if (error) {
-    return <div className="text-center py-10 text-red-500">{error}</div>;
-  }
+  // Filtrado seguro y flexible
+  const filtered = products
+    .filter(
+      (p) =>
+        (!query || p.name.toLowerCase().includes(query.toLowerCase())) &&
+        (!category || p.category === category)
+    )
+    .sort((a, b) => {
+      if (priceOrder === "asc") return Number(a.price) - Number(b.price);
+      if (priceOrder === "desc") return Number(b.price) - Number(a.price);
+      return 0;
+    });
+
+  if (loading)
+    return <div className="py-10 text-center">Cargando productos…</div>;
+  if (error)
+    return <div className="py-10 text-center text-red-500">{error}</div>;
 
   return (
     <section
@@ -193,63 +213,15 @@ const ProductGrid = ({ filters = {} }) => {
       className="bg-[#fefcf9] py-16 sm:py-24 px-4 sm:px-6 lg:px-8"
       aria-labelledby="products-heading"
     >
-      <div className="mx-auto max-w-7xl">
-        {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isVisible ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="mb-12 text-center"
-        >
-          <h2
-            id="products-heading"
-            className="text-3xl font-light tracking-tight text-[#3B2F2F] sm:text-4xl"
-          >
-            <span className="block font-serif italic text-[#3B2F2F]/90">
-              Nuestra
-            </span>
-            <span className="block mt-2 text-4xl font-bold sm:text-5xl">
-              Colección Premium
-            </span>
-          </h2>
-          <motion.p
-            className="max-w-2xl mx-auto mt-4 text-base text-[#3B2F2F]/80 sm:text-lg"
-            initial={{ opacity: 0 }}
-            animate={isVisible ? { opacity: 1 } : {}}
-            transition={{ duration: 0.6, delay: 0.3 }}
-          >
-            Descubre la excelencia en cada detalle con nuestras selecciones
-            cuidadosamente curadas.
-          </motion.p>
-        </motion.div>
-
-        {/* Product Grid */}
-        <motion.div
-          initial="hidden"
-          animate={isVisible ? "visible" : ""}
-          className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4"
-        >
-          {products.map((product, index) => (
-            <ProductCard key={product.id} product={product} index={index} />
-          ))}
-        </motion.div>
-
-        {/* Optional View More Button */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={isVisible ? { opacity: 1 } : {}}
-          transition={{ duration: 0.6, delay: 0.8 }}
-          className="mt-16 text-center"
-        >
-          <Button
-            variant="outline"
-            className="border-[#3B2F2F] text-[#3B2F2F] hover:bg-[#3B2F2F]/10 rounded-full px-8 py-3"
-            onClick={() => (window.location.href = "/products")}
-          >
-            Ver colección completa
-          </Button>
-        </motion.div>
-      </div>
+      <motion.div
+        initial="hidden"
+        animate={isVisible ? "visible" : ""}
+        className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4"
+      >
+        {filtered.map((p, idx) => (
+          <ProductCard key={p.id} product={p} index={idx} />
+        ))}
+      </motion.div>
     </section>
   );
 };

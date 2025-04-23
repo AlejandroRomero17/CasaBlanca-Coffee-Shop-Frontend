@@ -1,48 +1,88 @@
+// src/services/productService.ts
 import { API_BASE_URL } from "@/config/api";
-import { getSessionId } from '../utils/session';
+import { Product } from "@/types/product";
+import { getSessionId } from "@/utils/session";
 
-type ProductFilters = {
-  search?: string;
-  category?: string;
-  priceOrder?: string;
-  sort?: string;
-};
+/**
+ * Wrapper que maneja errores de red y parsea JSON.
+ * Deja listos los tipos Genéricos para que TypeScript infiera los retornos.
+ */
+async function request<T>(url: string, options?: RequestInit): Promise<T> {
+  const res = await fetch(url, options);
+  if (!res.ok) {
+    // Intenta extraer mensaje de error útil si la API lo devuelve
+    let msg: string;
+    try {
+      msg = await res.text();
+    } catch {
+      msg = `Request failed (${res.status})`;
+    }
+    throw new Error(msg);
+  }
+  return res.json() as Promise<T>;
+}
 
-export async function fetchProducts(filters: ProductFilters = {}) {
-  const params = new URLSearchParams();
-  if (filters.search) params.append('search', filters.search);
-  if (filters.category) params.append('category', filters.category);
-  if (filters.priceOrder) params.append('priceOrder', filters.priceOrder);
-  if (filters.sort) params.append('sort', filters.sort);
+// ──────────────────────────────────────────────────────────────────────────
+// CRUD Products
+// ──────────────────────────────────────────────────────────────────────────
 
-  // Obtén el token JWT desde localStorage (ajusta si lo guardas en otro lugar)
-  const token = localStorage.getItem('token');
+/* GET /api/products */
+export function fetchProducts(filters?: Record<string, any>): Promise<Product[]> {
+  let url = `${API_BASE_URL}/products`;
+  if (filters && Object.keys(filters).length > 0) {
+    const params = new URLSearchParams(filters).toString();
+    url += `?${params}`;
+  }
+  return request<Product[]>(url);
+}
 
-  const res = await fetch(`${API_BASE_URL}/products?${params.toString()}`, {
-    headers: {
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
+/* GET /api/products/:id  ─ alias para compatibilidad */
+export function getProductById(id: string): Promise<Product> {
+  return request<Product>(`${API_BASE_URL}/products/${id}`);
+}
+export const fetchProductById = getProductById; // alias legacy
+
+/* POST /api/products */
+export function createProduct(data: Partial<Product>): Promise<Product> {
+  return request<Product>(`${API_BASE_URL}/products`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error("No se pudieron obtener los productos");
-  return await res.json();
 }
 
-export async function fetchProductById(id: string) {
-  const res = await fetch(`${API_BASE_URL}/products/${id}`);
-  if (!res.ok) throw new Error("No se pudo obtener el producto");
-  return await res.json();
+/* PUT /api/products/:id */
+export function updateProduct(
+  id: string,
+  data: Partial<Product>
+): Promise<Product> {
+  return request<Product>(`${API_BASE_URL}/products/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
 }
 
-export async function fetchFeaturedProducts() {
-  const res = await fetch(`${API_BASE_URL}/products/featured`);
-  if (!res.ok) throw new Error("No se pudieron obtener los productos destacados");
-  return await res.json();
+/* DELETE /api/products/:id */
+export async function deleteProduct(id: string): Promise<void> {
+  await request(`${API_BASE_URL}/products/${id}`, { method: "DELETE" });
 }
 
-export async function fetchProductsByCategory(category: string) {
-  const res = await fetch(`${API_BASE_URL}/products/category/${category}`);
-  if (!res.ok) throw new Error("No se pudieron obtener los productos por categoría");
-  return await res.json();
+// ──────────────────────────────────────────────────────────────────────────
+//  Extra helpers (opcional)
+// ──────────────────────────────────────────────────────────────────────────
+/**
+ * Marca/Desmarca un producto como destacado sin necesitar cargar todos los campos.
+ */
+export function toggleFeatured(id: string, featured: boolean): Promise<Product> {
+  return updateProduct(id, { featured });
+}
+
+/**
+ * Cambia la disponibilidad rápidamente.
+ */
+export function setAvailability(id: string, available: boolean): Promise<Product> {
+  return updateProduct(id, { available });
 }
 
 export async function addToCartTemp(product: {

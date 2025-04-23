@@ -20,7 +20,6 @@ const Cart = () => {
     const session_id = localStorage.getItem("session_id");
     if (!session_id) return;
     fetchCart(session_id).then((data) => {
-     
       setItems(
         data.map((item: any) => ({
           id_cart_temp: item.id_cart_temp,
@@ -40,7 +39,7 @@ const Cart = () => {
     (sum, i) => sum + (Number(i.quantity) || 0) * (Number(i.product_price) || 0),
     0
   );
- 
+
   console.log("[DEBUG subtotal]", subtotal, items);
 
   if (loading) {
@@ -55,7 +54,6 @@ const Cart = () => {
     <main className="w-full min-h-screen px-4 py-16 bg-gray-50 md:py-24">
       <div className="max-w-screen-xl mx-auto space-y-8">
         <CartHeader itemCount={itemCount} />
-
         <div className="flex flex-col gap-8 lg:flex-row">
           {/* LISTADO */}
           <div className="flex-1 p-6 bg-white rounded-lg shadow">
@@ -65,8 +63,7 @@ const Cart = () => {
               refreshCart={refreshCart}
             />
           </div>
-
-          {/* RESUMEN + FORMULARIO DE PAGO */}
+          {/* RESUMEN + PAGO */}
           <div className="lg:w-[28rem]">
             <Elements
               stripe={stripePromise}

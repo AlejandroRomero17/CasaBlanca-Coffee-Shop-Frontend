@@ -6,9 +6,10 @@ import ProductFilterBar from "@/components/sections/products/ProductFilterBar";
 // import MerchBanner from "@/components/sections/products/MerchBanner";
 import SubscriptionCta from "@/components/sections/products/SubscriptionCta";
 import { useState } from "react";
+import type { ProductFilters } from "@/components/sections/products/ProductFilterBar";
 
 const Products = () => {
-  const [filters, setFilters] = useState({});
+  const [filters, setFilters] = useState<ProductFilters>({ search: "", category: "", priceOrder: "" });
 
   return (
     <>
@@ -16,7 +17,12 @@ const Products = () => {
       {/* <ProductCategories /> */}
       <ProductFilterBar filters={filters} setFilters={setFilters} />
       {/* <FeaturedProducts /> */}
-      <ProductGrid filters={filters} />
+      <ProductGrid
+        filters={filters}
+        query={filters.search || ""}
+        category={filters.category || ""}
+        priceOrder={filters.priceOrder || ""}
+      />
       {/* <MerchBanner /> */}
       <SubscriptionCta />
     </>
