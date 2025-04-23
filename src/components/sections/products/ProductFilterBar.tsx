@@ -31,6 +31,12 @@ const categoryLabels: Record<string, string> = {
   merch: "Merchandising",
 };
 
+
+function normalizeCategory(cat: string) {
+  if (cat === "cafe_en_grano" || cat === "café_en_grano") return "cafe";
+  return cat;
+}
+
 const ProductFilterBar: React.FC<ProductFilterBarProps> = ({ filters = {}, setFilters }) => {
   if (typeof setFilters !== 'function') {
     throw new Error("ProductFilterBar: setFilters prop must be a function");
@@ -43,7 +49,7 @@ const ProductFilterBar: React.FC<ProductFilterBarProps> = ({ filters = {}, setFi
   useEffect(() => {
     setFilters({
       search: query,
-      category,
+      category: normalizeCategory(category),
       priceOrder,
       sort: recent ? "recent" : undefined,
     });

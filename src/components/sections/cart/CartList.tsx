@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { useCartStore } from "@/store/cartStore";
+//import { useEffect } from "react";
+//import { useCartStore } from "@/store/cartStore";
 import CartItem from "./CartItem";
 import { deleteFromCart, updateCartQty, fetchCart } from '../../../services/cartService';
 import { getSessionId } from '../../../utils/session';
@@ -60,13 +60,13 @@ const CartList = ({ items, onUpdate, refreshCart }: CartListProps) => {
     <ul className="space-y-4">
       {items.map((it) => (
         <CartItem
-          key={item.id_cart_temp ?? item.product_id}
-          image={item.product_image || "https://placehold.co/120x120?text=Sin+Imagen"}
-          title={item.product_name}
-          price={typeof item.product_price === 'number' ? item.product_price : 0}
-          quantity={item.quantity}
-          onRemove={() => handleRemove(item.id_cart_temp)}
-          onQuantityChange={(q) => handleQty(item.id_cart_temp, q)}
+          key={it.id_cart_temp ?? it.product_id}
+          image={it.product_image || "https://placehold.co/120x120?text=Sin+Imagen"}
+          title={it.product_name}
+          price={typeof it.product_price === 'number' ? it.product_price : 0}
+          quantity={it.quantity}
+          onRemove={() => handleRemove(it.id_cart_temp)}
+          onQuantityChange={(q) => handleQty(it.id_cart_temp, q)}
         />
       ))}
     </ul>

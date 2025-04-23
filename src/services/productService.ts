@@ -30,6 +30,10 @@ async function request<T>(url: string, options?: RequestInit): Promise<T> {
 export function fetchProducts(filters?: Record<string, any>): Promise<Product[]> {
   let url = `${API_BASE_URL}/products`;
   if (filters && Object.keys(filters).length > 0) {
+    
+    if (filters.category && (filters.category.toLowerCase() === 'cafe' || filters.category.toLowerCase() === 'café')) {
+      filters.category = 'Café';
+    }
     const params = new URLSearchParams(filters).toString();
     url += `?${params}`;
   }

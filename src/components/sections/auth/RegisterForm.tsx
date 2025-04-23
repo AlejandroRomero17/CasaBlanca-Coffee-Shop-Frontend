@@ -70,6 +70,7 @@ export default function RegisterForm() {
         name: values.name,
         email: values.email,
         password: values.password,
+        role: "cliente",
       });
       setToken(res.token);
       setUser(res.user);

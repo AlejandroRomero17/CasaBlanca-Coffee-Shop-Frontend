@@ -8,7 +8,7 @@ export type ProductCategory =
   | "almuerzos";
 
 export interface Product {
-  id: string; // Supabase usa 'id' directamente
+  id: string;
   name: string;
   description: string;
   price: number;
@@ -21,7 +21,7 @@ export interface Product {
 }
 
 export interface OrderItem {
-  product: Product | string; // puede ser el objeto o solo el ID
+  product: Product | string; 
   quantity: number;
   price: number;
 }

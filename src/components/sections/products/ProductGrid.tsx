@@ -7,16 +7,7 @@ import clsx from "clsx";
 import { fetchProducts } from "@/services/productService";
 import { addToCart } from "@/services/cartService";
 import { useCart } from "@/context/CartContext";
-
-export type Product = {
-  id: string;
-  name: string;
-  description: string;
-  image: string;
-  price: string;
-  category?: string;
-  available?: boolean;
-};
+import type { Product } from "@/types/product";
 
 const MotionButton = motion(Button);
 
@@ -36,7 +27,6 @@ const ProductCard = ({
   const { refreshCart, session_id } = useCart();
 
   const [adding, setAdding] = useState(false);
-  const [cartCount, setCartCount] = useState(0);
 
   const handleAddToCart = async () => {
     setAdding(true);
@@ -129,7 +119,7 @@ const ProductCard = ({
             transition={{ duration: 0.4, delay: index * 0.1 + 0.5 }}
           >
             <span className="font-medium text-[#3B2F2F]">
-              ${product.price.toFixed(2)}
+              ${Number(product.price).toFixed(2)}
             </span>
 
             <MotionButton
@@ -144,7 +134,6 @@ const ProductCard = ({
                 "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5a4038]",
                 adding && "opacity-60 cursor-wait"
               )}
-              onClick={handleAddToCart}
               whileTap={{ scale: 0.95 }}
             >
               <ShoppingCart size={16} strokeWidth={2} />
@@ -171,16 +160,8 @@ const ProductGrid = ({ filters = {}, query = "", category = "", priceOrder = "" 
   useEffect(() => {
     setLoading(true);
     fetchProducts(filters)
-      .then((data) => {
-        // Depura la estructura de data
-        console.log("Productos recibidos:", data);
-        let productsArray: Product[] = [];
-        if (Array.isArray(data)) {
-          productsArray = data as Product[];
-        } else if (data && Array.isArray((data as any).products)) {
-          productsArray = (data as { products: Product[] }).products;
-        }
-        setProducts(productsArray.filter((p: Product) => p.available !== false));
+      .then((products) => {
+        setProducts(products.filter((p: Product) => p.available !== false));
         setLoading(false);
       })
       .catch((err) => {
@@ -189,12 +170,15 @@ const ProductGrid = ({ filters = {}, query = "", category = "", priceOrder = "" 
       });
   }, [filters]);
 
-  // Filtrado seguro y flexible
+  
+  const normalize = (str: string) =>
+    str.normalize('NFD').replace(/[00-\u036f]/g, '').toLowerCase();
+
   const filtered = products
     .filter(
       (p) =>
         (!query || p.name.toLowerCase().includes(query.toLowerCase())) &&
-        (!category || p.category === category)
+        (!category || normalize(p.category) === normalize(category))
     )
     .sort((a, b) => {
       if (priceOrder === "asc") return Number(a.price) - Number(b.price);

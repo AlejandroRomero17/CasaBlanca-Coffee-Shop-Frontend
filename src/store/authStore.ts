@@ -9,7 +9,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: "customer" | "admin";
+  role: "cliente" | "admin";
   avatarUrl?: string; // URL opcional del avatar
 }
 

@@ -7,7 +7,7 @@ interface LoginPayload {
 
 interface RegisterPayload extends LoginPayload {
   name: string;
-  role?: "customer" | "admin";
+  role?: "cliente" | "admin";
 }
 
 export async function login(payload: LoginPayload) {
@@ -16,11 +16,12 @@ export async function login(payload: LoginPayload) {
 }
 
 export async function register(payload: RegisterPayload) {
-  const response = await API.post("/users/register", payload);
+  const response = await API.post("/api/users/register", payload);
   return response.data;
 }
 
+
 export async function getProfile() {
-  const response = await API.get("/users/profile");
+  const response = await API.get("/api/users/profile");
   return response.data;
 }
