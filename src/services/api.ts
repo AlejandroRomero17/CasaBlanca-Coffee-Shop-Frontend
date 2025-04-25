@@ -1,3 +1,4 @@
+// src/services/api.ts
 import axios from "axios";
 
 const API = axios.create({
@@ -7,11 +8,11 @@ const API = axios.create({
   },
 });
 
-// Añadir el token JWT automáticamente
+// Inyecta el JWT en cada petición
 API.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    console.log("📦 Enviando token:", token); // 👈 útil para debug
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;

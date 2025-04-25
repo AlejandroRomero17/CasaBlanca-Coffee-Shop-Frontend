@@ -1,4 +1,3 @@
-// src/store/authStore.ts
 import { create } from "zustand";
 
 export interface User {
@@ -21,25 +20,23 @@ export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   token: typeof window !== "undefined" ? localStorage.getItem("token") : null,
 
-  setUser: (user) => set({ user }),
+  setUser: (user) => {
+    console.log("[authStore] setUser:", user);
+    set({ user });
+  },
 
   setToken: (token) => {
-    if (typeof window === "undefined") {
-      set({ token });
-      return;
-    }
-    if (token) {
-      localStorage.setItem("token", token);
-    } else {
-      localStorage.removeItem("token");
+    console.log("[authStore] setToken:", token);
+    if (typeof window !== "undefined") {
+      if (token) localStorage.setItem("token", token);
+      else localStorage.removeItem("token");
     }
     set({ token });
   },
 
   logout: () => {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("token");
-    }
+    console.log("[authStore] logout");
+    if (typeof window !== "undefined") localStorage.removeItem("token");
     set({ user: null, token: null });
   },
 }));
