@@ -2,7 +2,7 @@
 // src/pages/dashboard/AdminProducts.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,22 +23,26 @@ import {
 } from "@/components/ui/dialog";
 import ProductSearchBar from "@/components/dashboard/products/ProductSearchBar";
 import ProductTable from "@/components/dashboard/products/ProductTable";
-import {
-  fetchProducts,
-  createProduct,
-  updateProduct,
-  deleteProduct,
-} from "@/services/productService";
+import AddProductForm from "@/components/dashboard/products/AddProductForm";
+import { useProductStore } from "@/store/productStore";
 import { Product } from "@/types/product";
 
 const AdminProducts = () => {
-  const [products, setProducts] = useState<Product[]>([]);
+  const {
+    products,
+    loading,
+    error,
+    fetchProducts,
+    addProduct,
+    editProduct,
+    removeProduct,
+  } = useProductStore();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [productToEdit, setProductToEdit] = useState<Product | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  /** Carga inicial */
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);

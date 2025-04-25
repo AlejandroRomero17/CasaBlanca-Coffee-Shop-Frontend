@@ -1,9 +1,5 @@
 import { create } from "zustand";
 
-/**
- * Tipado centralizado del usuario.
- * Incluye `avatarUrl` opcional para la foto de perfil.
- */
 export interface User {
   id: string;
   name: string;

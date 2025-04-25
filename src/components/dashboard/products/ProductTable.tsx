@@ -5,6 +5,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  TableCell,
 } from "@/components/ui/table";
 import { Loader } from "lucide-react";
 import { Product } from "@/types/product";
@@ -14,6 +15,7 @@ interface Props {
   products: Product[];
   onEdit: (product: Product) => void;
   onDelete: (id: string) => void;
+  isLoading: boolean;
 }
 
 const ProductTable = ({ products, onEdit, onDelete, isLoading }: Props) => (

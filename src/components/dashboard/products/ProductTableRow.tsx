@@ -17,7 +17,7 @@ interface ProductWithStock extends Product {
 
 interface Props {
   product: ProductWithStock;
-  onEdit: (id: string, data: Partial<Product>) => void;
+  onEdit: (product: ProductWithStock) => void;
   onDelete: (id: string) => void;
 }
 
@@ -88,7 +88,6 @@ const ProductTableRow = ({ product, onEdit, onDelete }: Props) => {
               <Edit className="w-4 h-4 mr-2" /> Editar
             </DropdownMenuItem>
             <DropdownMenuItem
-              className="text-destructive"
               onClick={() => onDelete(product.id)}
               className="flex items-center px-3 py-2 text-sm text-red-600 hover:bg-gray-100"
             >

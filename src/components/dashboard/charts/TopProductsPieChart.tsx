@@ -1,5 +1,4 @@
 // src/components/dashboard/charts/TopProductsPieChart.tsx
-
 import {
   PieChart,
   Pie,
@@ -24,14 +23,19 @@ const productData = [
   { name: "Otros", value: 5 },
 ];
 
-const COLORS = ["#8B5A2B", "#A67C52", "#C69C6D", "#D4B996", "#E6CCAF"];
+// Nuevos colores actualizados para un aspecto más moderno
+const COLORS = ["#FF6347", "#4CAF50", "#FF9800", "#2196F3", "#9C27B0"];
 
 const TopProductsPieChart = () => {
   return (
-    <Card className="col-span-1">
+    <Card className="col-span-1 p-4 bg-white border-none rounded-lg shadow-md">
       <CardHeader>
-        <CardTitle>Productos Más Vendidos</CardTitle>
-        <CardDescription>Distribución de ventas por producto</CardDescription>
+        <CardTitle className="text-lg font-semibold text-[#4A4A4A]">
+          Productos Más Vendidos
+        </CardTitle>
+        <CardDescription className="text-sm text-gray-500">
+          Distribución de ventas por producto
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="h-[300px]">
@@ -52,7 +56,7 @@ const TopProductsPieChart = () => {
                 {productData.map((_, index) => (
                   <Cell
                     key={`cell-${index}`}
-                    fill={COLORS[index % COLORS.length]}
+                    fill={COLORS[index % COLORS.length]} // Colores nuevos para cada sección
                   />
                 ))}
               </Pie>

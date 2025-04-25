@@ -1,3 +1,5 @@
+"use client";
+
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useSidebarStore } from "@/store/sidebarStore";
@@ -35,14 +37,14 @@ const AdminSidebar = () => {
 
       <aside
         className={cn(
-          "h-full bg-white text-black shadow-md transition-all duration-300",
+          "h-full bg-white text-black shadow-sm transition-all duration-300", // fondo blanco y sombra ligera
           "w-64 sm:relative sm:block hidden",
           isCollapsed ? "md:w-20" : "md:w-64"
         )}
       >
         <div className="flex items-center justify-between px-4 py-4 sm:py-6 sm:px-6">
           {!isCollapsed && (
-            <h2 className="text-lg font-bold">Casa Blanca Admin</h2>
+            <h2 className="text-lg font-bold text-black">Casa Blanca Admin</h2>
           )}
           <button
             className="p-2 text-black sm:hidden hover:text-gray-600"
@@ -61,24 +63,26 @@ const AdminSidebar = () => {
                 to={href}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                  "hover:bg-gray-100",
-                  isActive && "bg-gray-100 font-semibold",
+                  "hover:bg-gray-200", // Cambio de hover para un fondo suave
+                  isActive && "bg-gray-300 font-semibold", // Color de fondo para item activo
                   isCollapsed && "justify-center px-0"
                 )}
                 onClick={() => {
                   if (window.innerWidth < 640) closeSidebar();
                 }}
               >
-                <Icon className="w-5 h-5" />
+                <Icon className="w-5 h-5 text-black" /> {/* Iconos negros */}
                 {!isCollapsed && name}
               </Link>
             );
           })}
         </nav>
 
+        {/* Separador ajustado a la medida del sidebar */}
         {!isCollapsed && (
           <>
-            <Separator className="mx-6 my-6 bg-gray-300" />
+            <Separator className="w-full my-2 bg-gray-300" />{" "}
+            {/* Usamos w-full */}
             <p className="px-6 pb-6 text-sm text-gray-500">
               Panel de administración
             </p>

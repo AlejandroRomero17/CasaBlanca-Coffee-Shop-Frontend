@@ -62,11 +62,17 @@ const SalesTabs = () => {
     <Tabs defaultValue="monthly">
       <div className="flex items-center justify-between">
         <TabsList>
-          <TabsTrigger value="monthly">Mensual</TabsTrigger>
-          <TabsTrigger value="daily">Diario</TabsTrigger>
-          <TabsTrigger value="hourly">Por Hora</TabsTrigger>
+          <TabsTrigger value="monthly" className="text-[#4A4A4A]">
+            Mensual
+          </TabsTrigger>
+          <TabsTrigger value="daily" className="text-[#4A4A4A]">
+            Diario
+          </TabsTrigger>
+          <TabsTrigger value="hourly" className="text-[#4A4A4A]">
+            Por Hora
+          </TabsTrigger>
         </TabsList>
-        <Select defaultValue="year">
+        <Select defaultValue="year" className="text-[#4A4A4A]">
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Seleccionar período" />
           </SelectTrigger>
@@ -80,20 +86,22 @@ const SalesTabs = () => {
       </div>
 
       <TabsContent value="monthly" className="mt-4">
-        <Card>
+        <Card className="bg-white rounded-lg shadow-md">
           <CardHeader>
-            <CardTitle>Ventas Mensuales</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-lg text-[#4A4A4A]">
+              Ventas Mensuales
+            </CardTitle>
+            <CardDescription className="text-sm text-gray-500">
               Tendencia de ventas durante el último año
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0">
             <div className="h-[350px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={monthlyData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                  <XAxis dataKey="name" stroke="#6B7280" />
+                  <YAxis stroke="#6B7280" />
                   <Tooltip
                     formatter={(value) => [`$${value}`, "Ventas"]}
                     contentStyle={{
@@ -104,7 +112,7 @@ const SalesTabs = () => {
                   <Line
                     type="monotone"
                     dataKey="ventas"
-                    stroke="#8B5A2B"
+                    stroke="#4A90E2"
                     strokeWidth={2}
                     activeDot={{ r: 8 }}
                   />
@@ -116,20 +124,22 @@ const SalesTabs = () => {
       </TabsContent>
 
       <TabsContent value="hourly" className="mt-4">
-        <Card>
+        <Card className="bg-white rounded-lg shadow-md">
           <CardHeader>
-            <CardTitle>Ventas por Hora</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-lg text-[#4A4A4A]">
+              Ventas por Hora
+            </CardTitle>
+            <CardDescription className="text-sm text-gray-500">
               Distribución de ventas durante el día
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0">
             <div className="h-[350px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={hourlyData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="hora" />
-                  <YAxis />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                  <XAxis dataKey="hora" stroke="#6B7280" />
+                  <YAxis stroke="#6B7280" />
                   <Tooltip
                     formatter={(value) => [`$${value}`, "Ventas"]}
                     contentStyle={{
@@ -137,7 +147,7 @@ const SalesTabs = () => {
                       borderRadius: "8px",
                     }}
                   />
-                  <Bar dataKey="ventas" fill="#8B5A2B" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="ventas" fill="#4A90E2" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -146,17 +156,19 @@ const SalesTabs = () => {
       </TabsContent>
 
       <TabsContent value="daily">
-        <Card>
+        <Card className="bg-white rounded-lg shadow-md">
           <CardHeader>
-            <CardTitle>Ventas Diarias</CardTitle>
-            <CardDescription>Ventas por día de la semana</CardDescription>
+            <CardTitle className="text-lg text-[#4A4A4A]">
+              Ventas Diarias
+            </CardTitle>
+            <CardDescription className="text-sm text-gray-500">
+              Ventas por día de la semana
+            </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="h-[350px] flex items-center justify-center">
-              <p className="text-muted-foreground">
-                Seleccione un rango de fechas para ver datos diarios
-              </p>
-            </div>
+          <CardContent className="flex items-center justify-center p-0">
+            <p className="text-muted-foreground">
+              Seleccione un rango de fechas para ver datos diarios
+            </p>
           </CardContent>
         </Card>
       </TabsContent>
