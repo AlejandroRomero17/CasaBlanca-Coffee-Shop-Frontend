@@ -8,7 +8,24 @@ import { getSessionId } from "@/utils/session";
  * Deja listos los tipos Genéricos para que TypeScript infiera los retornos.
  */
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(url, options);
+  const token = useAuthStore.getState().token; // Obtener el token desde el authStore
+
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`; // Incluir el token en la cabecera
+  }
+
+  const res = await fetch(url, {
+    ...options,
+    headers: {
+      ...headers,
+      ...(options?.headers || {}),
+    },
+  });
+
   if (!res.ok) {
     // Intenta extraer mensaje de error útil si la API lo devuelve
     let msg: string;
@@ -24,25 +41,8 @@ async function request<T>(url: string, options?: RequestInit): Promise<T> {
 
 // ──────────────────────────────────────────────────────────────────────────
 // CRUD Products
-// ──────────────────────────────────────────────────────────────────────────
-
-/* GET /api/products */
-export function fetchProducts(filters?: Record<string, any>): Promise<Product[]> {
-  let url = `${API_BASE_URL}/products`;
-  if (filters && Object.keys(filters).length > 0) {
-    
-    if (filters.category && (filters.category.toLowerCase() === 'cafe' || filters.category.toLowerCase() === 'café')) {
-      filters.category = 'Café';
-    }
-    const params = new URLSearchParams(filters).toString();
-    url += `?${params}`;
-  }
-  return request<Product[]>(url);
-}
-
-/* GET /api/products/:id  ─ alias para compatibilidad */
-export function getProductById(id: string): Promise<Product> {
-  return request<Product>(`${API_BASE_URL}/products/${id}`);
+export function fetchProducts(): Promise<Product[]> {
+  return request<Product[]>(`${API_BASE_URL}/products`);
 }
 export const fetchProductById = getProductById; // alias legacy
 

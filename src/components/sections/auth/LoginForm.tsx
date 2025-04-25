@@ -1,3 +1,4 @@
+// src/pages/auth/Login.tsx
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -10,215 +11,135 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
   FormControl,
+  FormMessage,
 } from "@/components/ui/form";
 import { login } from "@/services/authService";
-import { useAuthStore } from "@store/authStore";
-import { useAuthRedirect } from "@/hooks/useAuthRedirect";
-import { useState } from "react";
+import { useAuthStore } from "@/store/authStore";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { transferTempCartToUser } from "@/services/cartService";
+import { useState } from "react";
 
-const formSchema = z.object({
-  email: z.string().email({ message: "Ingresa un correo válido" }),
-  password: z.string().min(6, { message: "Mínimo 6 caracteres" }),
+const schema = z.object({
+  email: z.string().email("Ingresa un correo válido"),
+  password: z.string().min(6, "Mínimo 6 caracteres"),
 });
-
-type LoginValues = z.infer<typeof formSchema>;
+type Inputs = z.infer<typeof schema>;
 
 export default function LoginForm() {
-  useAuthRedirect();
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const setToken = useAuthStore((state) => state.setToken);
-  const setUser = useAuthStore((state) => state.setUser);
+  const [showPwd, setShowPwd] = useState(false);
+  const setToken = useAuthStore((s) => s.setToken);
+  const setUser = useAuthStore((s) => s.setUser);
   const navigate = useNavigate();
 
-  const form = useForm<LoginValues>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<Inputs>({
+    resolver: zodResolver(schema),
+    defaultValues: { email: "", password: "" },
     mode: "onBlur",
-    defaultValues: {
-      email: "",
-      password: "",
-    },
   });
 
-  const onSubmit = async (values: LoginValues) => {
-    //console.log("[LOGIN SUBMIT] values:", values);
+  const onSubmit = async (vals: Inputs) => {
     setLoading(true);
     try {
-     
-      const cleanEmail = values.email.trim().toLowerCase();
-      //console.log("[LOGIN SUBMIT] cleanEmail:", cleanEmail);
-      const res = await login({ ...values, email: cleanEmail });
-      setToken(res.token);
-      setUser(res.user);
-      
-      const session_id = localStorage.getItem("session_id");
-      if (session_id && res.user.id) {
-        try {
-          await transferTempCartToUser(session_id, res.user.id);
-        } catch (e) {
-         
-          //console.error("Error transfiriendo productos del carrito temporal:", e);
-        }
-      }
-      toast.success("Sesión iniciada", {
-        description: "Redirigiendo a tu cuenta...",
-        position: "top-center",
-      });
-     
-      if (res.user.role === "admin") {
-        setTimeout(() => navigate("/dashboard"), 1000);
+      const { token, user } = await login(vals);
+      setToken(token);
+      setUser(user);
+      toast.success("¡Bienvenido!", { position: "top-center" });
+      // redireccionar según rol:
+      if (user.role === "admin") {
+        navigate("/admin", { replace: true });
       } else {
-        setTimeout(() => navigate("/"), 1000);
+        navigate("/cart", { replace: true });
       }
-    } catch (err) {
-      //console.error("[LOGIN ERROR]", err);
-      toast.error("Credenciales incorrectas", {
-        description: "Verifica tu correo y contraseña",
-        position: "top-center",
-      });
-      form.setError("root", {
-        message: "Correo o contraseña incorrectos",
-      });
+    } catch {
+      toast.error("Credenciales incorrectas", { position: "top-center" });
+      form.setError("root", { message: "Email o contraseña inválidos" });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-50">
-      <div className="w-full max-w-md space-y-8">
-        <div className="text-center">
-          <h1 className="text-3xl font-medium text-gray-900">Iniciar sesión</h1>
-          <p className="mt-2 text-sm text-gray-600">
-            Accede a tu cuenta para continuar
-          </p>
-        </div>
-
+    <div className="flex items-center justify-center min-h-screen bg-[#F8F2E3]">
+      <div className="w-full max-w-md p-8 bg-white rounded shadow">
+        <h2 className="mb-4 text-2xl font-semibold text-center">
+          Iniciar sesión
+        </h2>
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="p-8 mt-8 space-y-6 bg-white border border-gray-200 rounded-lg shadow-sm"
-          >
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             {form.formState.errors.root && (
-              <div className="px-4 py-3 text-sm text-red-600 rounded-md bg-red-50">
+              <div className="p-2 text-sm text-red-700 bg-red-100 rounded">
                 {form.formState.errors.root.message}
               </div>
             )}
 
-            <div className="space-y-4">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field, fieldState }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium text-gray-700">
-                      Correo electrónico
-                    </FormLabel>
-                    <FormControl>
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field, fieldState }) => (
+                <FormItem>
+                  <FormLabel>Correo electrónico</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      className={cn(fieldState.error && "border-red-500")}
+                      autoComplete="email"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field, fieldState }) => (
+                <FormItem>
+                  <FormLabel>Contraseña</FormLabel>
+                  <FormControl>
+                    <div className="relative">
                       <Input
-                        type="email"
+                        type={showPwd ? "text" : "password"}
                         {...field}
                         className={cn(
-                          "h-12 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500",
+                          "pr-10",
                           fieldState.error && "border-red-500"
                         )}
-                        autoComplete="email"
-                        aria-invalid={fieldState.invalid}
+                        autoComplete="current-password"
                       />
-                    </FormControl>
-                    <FormMessage className="text-xs text-red-600" />
-                  </FormItem>
-                )}
-              />
+                      <button
+                        type="button"
+                        onClick={() => setShowPwd(!showPwd)}
+                        className="absolute inset-y-0 flex items-center right-2"
+                        aria-label={
+                          showPwd ? "Ocultar contraseña" : "Mostrar contraseña"
+                        }
+                      >
+                        {showPwd ? <EyeOff /> : <Eye />}
+                      </button>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field, fieldState }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium text-gray-700">
-                      Contraseña
-                    </FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Input
-                          type={showPassword ? "text" : "password"}
-                          {...field}
-                          className={cn(
-                            "h-12 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 pr-10",
-                            fieldState.error && "border-red-500"
-                          )}
-                          autoComplete="current-password"
-                          aria-invalid={fieldState.invalid}
-                        />
-                        <button
-                          type="button"
-                          className="absolute text-gray-500 -translate-y-1/2 right-3 top-1/2 hover:text-gray-700"
-                          onClick={() => setShowPassword(!showPassword)}
-                          aria-label={
-                            showPassword
-                              ? "Ocultar contraseña"
-                              : "Mostrar contraseña"
-                          }
-                        >
-                          {showPassword ? (
-                            <EyeOff className="w-5 h-5" />
-                          ) : (
-                            <Eye className="w-5 h-5" />
-                          )}
-                        </button>
-                      </div>
-                    </FormControl>
-                    <FormMessage className="text-xs text-red-600" />
-                  </FormItem>
-                )}
-              />
-
-              <div className="flex items-center justify-end">
-                <a
-                  href="/forgot-password"
-                  className="text-sm font-medium text-blue-600 hover:text-blue-500 hover:underline"
-                >
-                  ¿Olvidaste tu contraseña?
-                </a>
-              </div>
-            </div>
-
-            <div>
-              <Button
-                type="submit"
-                className="w-full h-12 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                disabled={loading}
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Iniciando sesión...
-                  </>
-                ) : (
-                  "Iniciar sesión"
-                )}
-              </Button>
-            </div>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Entrando...
+                </>
+              ) : (
+                "Entrar"
+              )}
+            </Button>
           </form>
         </Form>
-
-        <div className="text-sm text-center text-gray-600">
-          ¿No tienes una cuenta?{" "}
-          <a
-            href="/register"
-            className="font-medium text-blue-600 hover:text-blue-500 hover:underline"
-          >
-            Regístrate
-          </a>
-        </div>
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 // src/pages/dashboard/AdminProducts.tsx
+// src/pages/dashboard/AdminProducts.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -11,6 +12,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogPortal,
+  DialogOverlay,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import ProductSearchBar from "@/components/dashboard/products/ProductSearchBar";
 import ProductTable from "@/components/dashboard/products/ProductTable";
 import {
@@ -24,64 +34,14 @@ import { Product } from "@/types/product";
 const AdminProducts = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [productToEdit, setProductToEdit] = useState<Product | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   /** Carga inicial */
   useEffect(() => {
-    refresh();
-  }, []);
-
-  const refresh = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await fetchProducts();
-      setProducts(data);
-    } catch (err) {
-      setError((err as Error).message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  /** Placeholder para crear producto: abre un modal real en producción */
-  const handleAdd = async () => {
-    try {
-      const nuevo: Partial<Product> = {
-        name: "Nuevo producto",
-        description: "Descripción…",
-        category: "café",
-        price: 0,
-        image: "",
-        available: true,
-        featured: false,
-      };
-      await createProduct(nuevo);
-      await refresh();
-    } catch (err) {
-      alert((err as Error).message);
-    }
-  };
-
-  const handleEdit = async (id: string, data: Partial<Product>) => {
-    try {
-      await updateProduct(id, data);
-      await refresh();
-    } catch (err) {
-      alert((err as Error).message);
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!confirm("¿Eliminar producto?")) return;
-    try {
-      await deleteProduct(id);
-      await refresh();
-    } catch (err) {
-      alert((err as Error).message);
-    }
-  };
+    fetchProducts();
+  }, [fetchProducts]);
 
   const filtered = products.filter(
     (p) =>
@@ -90,21 +50,61 @@ const AdminProducts = () => {
   );
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 bg-gray-50">
+      {/* Header + Añadir */}
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-[#4A3520]">Productos</h1>
-        <Button onClick={handleAdd} className="bg-[#8B5A2B] hover:bg-[#6E4A22]">
+        <h1 className="text-3xl font-bold text-black">Productos</h1>
+        <Button
+          onClick={() => {
+            setProductToEdit(null);
+            setIsFormOpen(true);
+          }}
+          className="text-white bg-blue-500 hover:bg-blue-600"
+        >
           <Plus className="w-4 h-4 mr-2" /> Añadir Producto
         </Button>
       </div>
 
-      <Card>
-        <CardHeader>
+      {/* Modal Añadir / Editar */}
+      <Dialog
+        open={isFormOpen}
+        onOpenChange={(o) => !o && setIsFormOpen(false)}
+      >
+        <DialogPortal>
+          <DialogOverlay className="fixed inset-0 bg-black/30" />
+          <DialogContent className="fixed w-11/12 max-w-lg p-6 -translate-x-1/2 -translate-y-1/2 bg-white border border-gray-200 rounded-lg shadow-lg top-1/2 left-1/2">
+            <DialogHeader>
+              <DialogTitle className="text-xl text-black">
+                {productToEdit ? "Editar Producto" : "Crear Producto"}
+              </DialogTitle>
+            </DialogHeader>
+            <AddProductForm
+              productToEdit={productToEdit}
+              onClose={() => setIsFormOpen(false)}
+              onSubmit={async (data) => {
+                if (productToEdit) {
+                  await editProduct(productToEdit.id, data);
+                } else {
+                  await addProduct(data);
+                }
+                setIsFormOpen(false);
+              }}
+            />
+            <DialogFooter />
+          </DialogContent>
+        </DialogPortal>
+      </Dialog>
+
+      {/* Tabla de productos */}
+      <Card className="border border-gray-200 rounded-lg shadow-sm">
+        <CardHeader className="bg-white border-b border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Inventario de Productos</CardTitle>
-              <CardDescription>
-                Gestiona tu inventario de café y alimentos
+              <CardTitle className="text-lg font-semibold text-black">
+                Inventario
+              </CardTitle>
+              <CardDescription className="text-sm text-gray-600">
+                Administra tu catálogo de productos
               </CardDescription>
             </div>
             <ProductSearchBar
@@ -113,19 +113,55 @@ const AdminProducts = () => {
             />
           </div>
         </CardHeader>
-        <CardContent>
-          {error && <p className="mb-4 text-red-500">{error}</p>}
-          {loading ? (
-            <p>Cargando…</p>
-          ) : (
-            <ProductTable
-              products={filtered}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          )}
+        <CardContent className="bg-white">
+          {error && <p className="mb-4 text-red-600">{error}</p>}
+          <ProductTable
+            products={filtered}
+            onEdit={(p) => {
+              setProductToEdit(p);
+              setIsFormOpen(true);
+            }}
+            onDelete={(id) => setDeleteId(id)}
+            isLoading={loading}
+          />
         </CardContent>
       </Card>
+
+      {/* Confirmación de eliminación */}
+      <Dialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)}>
+        <DialogPortal>
+          <DialogOverlay className="fixed inset-0 bg-black/30" />
+          <DialogContent className="fixed w-11/12 max-w-sm p-6 -translate-x-1/2 -translate-y-1/2 bg-white border border-gray-200 rounded-lg shadow-lg top-1/2 left-1/2">
+            <DialogHeader>
+              <DialogTitle className="text-lg font-medium text-black">
+                Confirmar Eliminación
+              </DialogTitle>
+            </DialogHeader>
+            <p className="mt-2 text-sm text-black">
+              ¿Seguro que deseas eliminar este producto? Esta acción es
+              irreversible.
+            </p>
+            <DialogFooter className="flex justify-end mt-6 space-x-3">
+              <Button
+                variant="outline"
+                className="px-4 py-2 text-black border-gray-300 hover:bg-gray-100"
+                onClick={() => setDeleteId(null)}
+              >
+                Cancelar
+              </Button>
+              <Button
+                className="px-4 py-2 text-white bg-red-500 hover:bg-red-600"
+                onClick={async () => {
+                  if (deleteId) await removeProduct(deleteId);
+                  setDeleteId(null);
+                }}
+              >
+                Eliminar
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </DialogPortal>
+      </Dialog>
     </div>
   );
 };
