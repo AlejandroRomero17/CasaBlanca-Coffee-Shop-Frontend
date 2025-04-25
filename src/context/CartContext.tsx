@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { fetchCart } from "@/services/cartService";
+import { fetchCart, getCartByUser, isAuthenticated, getUserId } from "@/services/cartService";
 
 const CartContext = createContext<any>(null);
 
@@ -17,19 +17,43 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   })();
 
   const refreshCart = async () => {
+    console.log('[DEBUG CartContext] refreshCart called');
     setLoading(true);
-    const data = await fetchCart(session_id);
-    setItems(
-      data.map((item: any) => ({
-        id: item.product_id,
-        name: item.product_name,
-        image: item.product_image || "https://via.placeholder.com/150",
-        quantity: item.quantity,
-        price: item.product_price,
-      }))
-    );
+    let data = [];
+    if (isAuthenticated()) {
+      
+      const user_id = getUserId();
+      console.log('[DEBUG CartContext] Auth user_id:', user_id);
+      try {
+        data = await getCartByUser(user_id); 
+        console.log('[DEBUG CartContext] getCartByUser response:', data);
+      } catch (err) {
+        data = [];
+      }
+    } else {
+      
+      data = await fetchCart(session_id);
+      console.log('[DEBUG CartContext] fetchCart response:', data);
+    }
+    const mapped = data.map((item: any) => ({
+      id_cart: item.id_cart,
+      id_cart_temp: item.id_cart_temp,
+      product_id: item.product_id,
+      product_name: item.product_name,
+      product_image: item.product_image || "https://via.placeholder.com/150",
+      quantity: item.quantity,
+      product_price: item.product_price,
+    }));
+    console.log('[DEBUG CartContext] mapped items:', mapped);
+    setItems(mapped);
     setLoading(false);
   };
+
+  // Permitir refrescar el carrito desde cualquier lugar
+  useEffect(() => {
+    window.addEventListener('cart:refresh', refreshCart);
+    return () => window.removeEventListener('cart:refresh', refreshCart);
+  }, []);
 
   useEffect(() => {
     refreshCart();

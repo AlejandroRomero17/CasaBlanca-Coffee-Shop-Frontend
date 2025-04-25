@@ -48,32 +48,37 @@ export default function LoginForm() {
   });
 
   const onSubmit = async (values: LoginValues) => {
+    //console.log("[LOGIN SUBMIT] values:", values);
     setLoading(true);
     try {
-      const res = await login(values);
+     
+      const cleanEmail = values.email.trim().toLowerCase();
+      //console.log("[LOGIN SUBMIT] cleanEmail:", cleanEmail);
+      const res = await login({ ...values, email: cleanEmail });
       setToken(res.token);
       setUser(res.user);
-      // Transferir productos del carrito temporal al autenticado si existen
+      
       const session_id = localStorage.getItem("session_id");
       if (session_id && res.user.id) {
         try {
           await transferTempCartToUser(session_id, res.user.id);
         } catch (e) {
-          // Si falla la transferencia, solo lo logueamos (no bloquea el login)
-          console.error("Error transfiriendo productos del carrito temporal:", e);
+         
+          //console.error("Error transfiriendo productos del carrito temporal:", e);
         }
       }
       toast.success("Sesión iniciada", {
         description: "Redirigiendo a tu cuenta...",
         position: "top-center",
       });
-      // Redirección dependiendo del rol
+     
       if (res.user.role === "admin") {
         setTimeout(() => navigate("/dashboard"), 1000);
       } else {
         setTimeout(() => navigate("/"), 1000);
       }
-    } catch {
+    } catch (err) {
+      //console.error("[LOGIN ERROR]", err);
       toast.error("Credenciales incorrectas", {
         description: "Verifica tu correo y contraseña",
         position: "top-center",

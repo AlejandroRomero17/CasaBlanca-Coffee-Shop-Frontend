@@ -8,6 +8,7 @@ import { Menu, ShoppingCart, X } from "lucide-react";
 import { fetchProducts } from "@/services/productService";
 import { Product } from "@/types/product";
 import { useCart } from "../../context/CartContext";
+import { useAuthStore } from "@store/authStore";
 
 const navLinks = [
   { name: "Inicio", href: "/" },
@@ -29,6 +30,8 @@ export function Navbar({ isMenuOpen, onMenuClick }: NavbarProps) {
   const [results, setResults] = useState<Product[]>([]);
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [bounce, setBounce] = useState(false);
+  const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
 
   useEffect(() => {
     fetchProducts().then(setAllProducts).catch(console.error);
@@ -94,7 +97,7 @@ export function Navbar({ isMenuOpen, onMenuClick }: NavbarProps) {
         {/* LINKS DESKTOP */}
         <div className="items-center hidden md:flex">{renderLinks()}</div>
 
-        {/* SEARCH + CART */}
+        {/* SEARCH + CART + LOGOUT */}
         <div className="relative items-center hidden space-x-3 md:flex">
           <Input
             value={search}
@@ -110,7 +113,7 @@ export function Navbar({ isMenuOpen, onMenuClick }: NavbarProps) {
                   key={item.id}
                   onClick={() => {
                     setSearch("");
-                    navigate("/products"); // Puedes redirigir o usar un modal, etc.
+                    navigate("/products");
                   }}
                   className="flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-gray-100"
                 >
@@ -156,6 +159,21 @@ export function Navbar({ isMenuOpen, onMenuClick }: NavbarProps) {
               </Button>
             </motion.div>
           </Link>
+
+          {/* BOTÓN DE CERRAR SESIÓN */}
+          {user && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="ml-2 text-white border-white hover:bg-[#D09E66]/20 hover:text-[#D09E66]"
+              onClick={() => {
+                logout();
+                navigate("/login");
+              }}
+            >
+              Cerrar sesión
+            </Button>
+          )}
         </div>
 
         {/* MENU ICON */}

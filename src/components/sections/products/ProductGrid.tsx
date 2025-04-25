@@ -24,7 +24,7 @@ const ProductCard = ({
     margin: "0px 0px -100px 0px",
   });
 
-  const { refreshCart, session_id } = useCart();
+  const { refreshCart } = useCart();
 
   const [adding, setAdding] = useState(false);
 
@@ -41,8 +41,7 @@ const ProductCard = ({
         setAdding(false);
         return;
       }
-      console.log("session_id:", session_id, "product_id:", productId);
-      await addToCart(session_id, {
+      await addToCart({
         product_id: productId,
         product_name: product.name,
         product_image: product.image,

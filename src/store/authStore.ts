@@ -25,7 +25,12 @@ export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   token: typeof window !== "undefined" ? localStorage.getItem("token") : null,
 
-  setUser: (user) => set({ user }),
+  setUser: (user) => {
+    if (typeof window !== "undefined" && user && user.id) {
+      localStorage.setItem("user", JSON.stringify(user));
+    }
+    set({ user });
+  },
 
   setToken: (token) => {
     if (typeof window === "undefined") {
