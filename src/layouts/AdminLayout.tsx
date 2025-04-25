@@ -8,10 +8,11 @@ const AdminLayout = () => {
   const isCollapsed = useSidebarStore((s) => s.isCollapsed);
 
   return (
-    <div className="flex flex-col w-screen h-screen overflow-hidden bg-gray-50">
+    <div className="flex flex-col w-screen h-screen overflow-hidden bg-[#F2F4F7]">
+      {" "}
+      {/* Fondo cafecito claro */}
       {/* Navbar fijo arriba */}
       <AdminNavbar />
-
       {/* Contenedor principal */}
       <div className="flex flex-1 h-full overflow-hidden">
         {/* Sidebar a la izquierda */}

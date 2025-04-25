@@ -98,11 +98,11 @@ export default function RegisterForm() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-50">
+    <div className="flex flex-col items-center justify-center min-h-screen w-full bg-[#F8F2E3]">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
-          <h1 className="text-3xl font-medium text-gray-900">Crear cuenta</h1>
-          <p className="mt-2 text-sm text-gray-600">
+          <h1 className="text-3xl font-medium text-[#3B2F2F]">Crear cuenta</h1>
+          <p className="mt-2 text-sm text-[#3B2F2F]">
             Regístrate para continuar
           </p>
         </div>
@@ -110,7 +110,7 @@ export default function RegisterForm() {
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="p-8 mt-8 space-y-6 bg-white border border-gray-200 rounded-lg shadow-sm"
+            className="p-8 mt-8 space-y-6 bg-white border border-[#D09E66] rounded-lg shadow-md"
           >
             <div className="space-y-4">
               <FormField
@@ -118,7 +118,7 @@ export default function RegisterForm() {
                 name="name"
                 render={({ field, fieldState }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-gray-700">
+                    <FormLabel className="text-sm font-medium text-[#3B2F2F]">
                       Nombre completo
                     </FormLabel>
                     <FormControl>
@@ -126,7 +126,7 @@ export default function RegisterForm() {
                         placeholder=""
                         {...field}
                         className={cn(
-                          "h-12 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500",
+                          "h-12 rounded-lg border-[#D09E66] focus:border-[#3B2F2F] focus:ring-1 focus:ring-[#D09E66]",
                           fieldState.error && "border-red-500"
                         )}
                         autoComplete="name"
@@ -143,7 +143,7 @@ export default function RegisterForm() {
                 name="email"
                 render={({ field, fieldState }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-gray-700">
+                    <FormLabel className="text-sm font-medium text-[#3B2F2F]">
                       Correo electrónico
                     </FormLabel>
                     <FormControl>
@@ -152,7 +152,7 @@ export default function RegisterForm() {
                         placeholder=""
                         {...field}
                         className={cn(
-                          "h-12 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500",
+                          "h-12 rounded-lg border-[#D09E66] focus:border-[#3B2F2F] focus:ring-1 focus:ring-[#D09E66]",
                           fieldState.error && "border-red-500"
                         )}
                         autoComplete="email"
@@ -169,7 +169,7 @@ export default function RegisterForm() {
                 name="password"
                 render={({ field, fieldState }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-gray-700">
+                    <FormLabel className="text-sm font-medium text-[#3B2F2F]">
                       Contraseña
                     </FormLabel>
                     <FormControl>
@@ -179,7 +179,7 @@ export default function RegisterForm() {
                           placeholder=""
                           {...field}
                           className={cn(
-                            "h-12 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 pr-10",
+                            "h-12 rounded-lg border-[#D09E66] focus:border-[#3B2F2F] focus:ring-1 focus:ring-[#D09E66] pr-10",
                             fieldState.error && "border-red-500"
                           )}
                           autoComplete="new-password"
@@ -187,7 +187,7 @@ export default function RegisterForm() {
                         />
                         <button
                           type="button"
-                          className="absolute text-gray-500 -translate-y-1/2 right-3 top-1/2 hover:text-gray-700"
+                          className="absolute text-[#3B2F2F] -translate-y-1/2 right-3 top-1/2 hover:text-[#D09E66]"
                           onClick={() => setShowPassword(!showPassword)}
                           aria-label={
                             showPassword
@@ -216,7 +216,7 @@ export default function RegisterForm() {
                 name="confirmPassword"
                 render={({ field, fieldState }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-gray-700">
+                    <FormLabel className="text-sm font-medium text-[#3B2F2F]">
                       Confirmar contraseña
                     </FormLabel>
                     <FormControl>
@@ -226,7 +226,7 @@ export default function RegisterForm() {
                           placeholder=""
                           {...field}
                           className={cn(
-                            "h-12 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 pr-10",
+                            "h-12 rounded-lg border-[#D09E66] focus:border-[#3B2F2F] focus:ring-1 focus:ring-[#D09E66] pr-10",
                             fieldState.error && "border-red-500"
                           )}
                           autoComplete="new-password"
@@ -234,7 +234,7 @@ export default function RegisterForm() {
                         />
                         <button
                           type="button"
-                          className="absolute text-gray-500 -translate-y-1/2 right-3 top-1/2 hover:text-gray-700"
+                          className="absolute text-[#3B2F2F] -translate-y-1/2 right-3 top-1/2 hover:text-[#D09E66]"
                           onClick={() =>
                             setShowConfirmPassword(!showConfirmPassword)
                           }
@@ -261,7 +261,7 @@ export default function RegisterForm() {
             <div>
               <Button
                 type="submit"
-                className="w-full h-12 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                className="w-full h-12 text-sm font-medium text-white bg-[#3B2F2F] rounded-lg hover:bg-[#D09E66] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D09E66] focus-visible:ring-offset-2"
                 disabled={loading}
               >
                 {loading ? (
@@ -277,11 +277,11 @@ export default function RegisterForm() {
           </form>
         </Form>
 
-        <div className="text-sm text-center text-gray-600">
+        <div className="text-sm text-center text-[#3B2F2F]">
           ¿Ya tienes una cuenta?{" "}
           <a
             href="/login"
-            className="font-medium text-blue-600 hover:text-blue-500 hover:underline"
+            className="font-medium text-[#D09E66] hover:text-[#3B2F2F] hover:underline"
           >
             Inicia sesión
           </a>

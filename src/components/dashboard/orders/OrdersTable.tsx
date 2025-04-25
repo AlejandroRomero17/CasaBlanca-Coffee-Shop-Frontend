@@ -1,4 +1,5 @@
 // components/OrdersTable.tsx
+// components/OrdersTable.tsx
 import { useEffect, useState } from "react";
 import {
   Check,
@@ -113,7 +114,7 @@ const OrdersTable = () => {
   return (
     <>
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-[#4A3520]">Pedidos</h1>
+        <h1 className="text-3xl font-bold text-[#4A4A4A]">Pedidos</h1>
         <div className="flex items-center gap-x-2">
           <Select defaultValue="all" onValueChange={setStatusFilter}>
             <SelectTrigger className="w-[180px]">
@@ -131,7 +132,7 @@ const OrdersTable = () => {
         </div>
       </div>
 
-      <Card>
+      <Card className="bg-white rounded-lg shadow-md">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
@@ -155,7 +156,7 @@ const OrdersTable = () => {
         <CardContent>
           <Table>
             <TableHeader>
-              <TableRow>
+              <TableRow className="bg-[#f9f7f4]">
                 <TableHead>ID</TableHead>
                 <TableHead>Cliente</TableHead>
                 <TableHead>Items</TableHead>
@@ -166,17 +167,11 @@ const OrdersTable = () => {
             </TableHeader>
             <TableBody>
               {filteredOrders.map((order) => (
-                <TableRow key={order._id}>
-                  <TableCell className="font-medium">
+                <TableRow key={order._id} className="bg-white">
+                  <TableCell className="font-medium text-[#4A4A4A]">
                     {order._id?.slice(-6)}
                   </TableCell>
-                  <TableCell>
-                    {order.isDelivery
-                      ? "Envío"
-                      : order.tableNumber
-                      ? `Mesa ${order.tableNumber}`
-                      : "Cliente"}
-                  </TableCell>
+                  <TableCell>{order.isDelivery ? "Envío" : "Mesa"}</TableCell>
                   <TableCell>
                     <div className="flex flex-col">
                       {order.items.map((item, index) => {
@@ -239,7 +234,6 @@ const OrdersTable = () => {
                             handleStatusChange(order._id, "entregado")
                           }
                         >
-                          ​
                           <Check className="w-4 h-4 mr-2" /> Marcar como
                           entregado
                         </DropdownMenuItem>

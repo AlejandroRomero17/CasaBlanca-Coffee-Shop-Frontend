@@ -1,16 +1,12 @@
 // src/store/authStore.ts
 import { create } from "zustand";
 
-/**
- * Tipado centralizado del usuario.
- * Incluye `avatarUrl` opcional para la foto de perfil.
- */
 export interface User {
   id: string;
   name: string;
   email: string;
   role: "customer" | "admin";
-  avatarUrl?: string; // URL opcional del avatar
+  avatarUrl?: string;
 }
 
 interface AuthState {

@@ -1,51 +1,36 @@
-import { motion } from "framer-motion";
-import { UtensilsCrossed } from "lucide-react";
-
-import coffeeCup1 from "@/assets/images/coffee-cups/coffee-cup.png";
-import coffeeCup2 from "@/assets/images/coffee-cups/coffee-cup2.png";
-import coffeeCup3 from "@/assets/images/coffee-cups/coffee-cup3.png";
-import coffeeCup4 from "@/assets/images/coffee-cups/coffee-cup4.png";
-
-type MenuItem = {
-  name: string;
-  description: string;
-  price: string;
-  image: string;
-};
-
-const menuItems: MenuItem[] = [
-  {
-    name: "Waffle Ice Cream",
-    description: "Crujiente waffle con helado de vainilla y caramelo.",
-    price: "$65",
-    image: coffeeCup1,
-  },
-  {
-    name: "Hot Milk",
-    description: "Leche caliente espumosa, ideal para relajarte.",
-    price: "$45",
-    image: coffeeCup2,
-  },
-  {
-    name: "Cappuccino",
-    description: "Café intenso con espuma cremosa.",
-    price: "$55",
-    image: coffeeCup3,
-  },
-  {
-    name: "Sandwich",
-    description: "Pan artesanal con ingredientes frescos.",
-    price: "$60",
-    image: coffeeCup4,
-  },
-];
+// src/components/SpecialMenu.tsx
+import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import { UtensilsCrossed } from 'lucide-react';
+import { fetchProducts } from '@/services/productService'; // Cambié a la función que obtiene todos los productos
+import { Product } from '@/types/product';
 
 const SpecialMenu = () => {
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    const loadFeaturedProducts = async () => {
+      try {
+        // Obtener todos los productos
+        const allProducts = await fetchProducts();
+
+        // Filtrar productos destacados
+        const featured = allProducts.filter((product) => product.featured);
+
+        // Ordenar por fecha si es necesario, y tomar los primeros 4 productos
+        const recentFeatured = featured.slice(0, 4); // Limitar a los primeros 4 productos
+
+        setFeaturedProducts(recentFeatured); // Establecer en el estado
+      } catch (error) {
+        console.error("Error loading featured products:", error);
+      }
+    };
+
+    loadFeaturedProducts(); // Llamar a la función de carga
+  }, []); // Solo se ejecuta una vez al montar el componente
+
   return (
-    <section
-      id="especial"
-      className="bg-beige-light py-20 px-6 md:px-16 lg:px-28 text-center"
-    >
+    <section id="especial" className="px-6 py-20 text-center bg-beige-light md:px-16 lg:px-28">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -53,23 +38,20 @@ const SpecialMenu = () => {
         viewport={{ once: true }}
         className="mb-16"
       >
-        <div className="flex justify-center items-center gap-2 mb-4 text-gold">
+        <div className="flex items-center justify-center gap-2 mb-4 text-gold">
           <UtensilsCrossed className="w-6 h-6" />
-          <span className="uppercase tracking-wider font-semibold">
-            Menú Especial
-          </span>
+          <span className="font-semibold tracking-wider uppercase">Menú Especial</span>
         </div>
-        <h2 className="text-3xl md:text-5xl font-fancy font-bold text-coffee-dark">
+        <h2 className="text-3xl font-bold md:text-5xl font-fancy text-coffee-dark">
           Menú Especial para Ti
         </h2>
-        <p className="text-base md:text-lg text-coffee-dark/80 max-w-xl mx-auto mt-4">
-          Descubre nuestras deliciosas opciones diseñadas para consentir tu
-          paladar. ¡Recién hechas y listas para ti!
+        <p className="max-w-xl mx-auto mt-4 text-base md:text-lg text-coffee-dark/80">
+          Descubre nuestras deliciosas opciones diseñadas para consentir tu paladar. ¡Recién hechas y listas para ti!
         </p>
       </motion.div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
-        {menuItems.map((item, idx) => (
+      <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
+        {featuredProducts.map((item, idx) => (
           <motion.div
             key={idx}
             initial={{ opacity: 0, y: 40 }}
@@ -82,17 +64,13 @@ const SpecialMenu = () => {
               <img
                 src={item.image}
                 alt={item.name}
-                className="w-full h-52 object-contain scale-100 group-hover:scale-105 transition-transform duration-500 mx-auto p-6"
+                className="object-contain w-full p-6 mx-auto transition-transform duration-500 scale-100 h-52 group-hover:scale-105"
               />
             </div>
-            <div className="p-6 text-left flex flex-col flex-1">
-              <h3 className="text-xl font-semibold text-coffee-dark mb-2">
-                {item.name}
-              </h3>
-              <p className="text-sm text-coffee-dark/70 mb-4 flex-grow">
-                {item.description}
-              </p>
-              <div className="text-gold text-lg font-bold">{item.price}</div>
+            <div className="flex flex-col flex-1 p-6 text-left">
+              <h3 className="mb-2 text-xl font-semibold text-coffee-dark">{item.name}</h3>
+              <p className="flex-grow mb-4 text-sm text-coffee-dark/70">{item.description}</p>
+              <div className="text-lg font-bold text-gold">{item.price}</div>
             </div>
           </motion.div>
         ))}

@@ -1,6 +1,11 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+// Función para generar un sessionId
+const generateSessionId = () => {
+  return `session-${Math.random().toString(36).substr(2, 9)}`;
+};
+
 export type CartItem = {
   id: string;
   name: string;
@@ -60,7 +65,3 @@ export const useCartStore = create<CartStore>()(
     { name: "cart-storage" } // Persistir en localStorage
   )
 );
-
-const generateSessionId = () => {
-  return `session-${Math.random().toString(36).substr(2, 9)}`;
-};

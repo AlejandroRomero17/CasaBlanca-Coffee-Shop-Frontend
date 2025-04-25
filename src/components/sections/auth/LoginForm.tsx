@@ -71,11 +71,13 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-50">
+    <div className="flex flex-col items-center justify-center min-h-screen w-full bg-[#F8F2E3]">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
-          <h1 className="text-3xl font-medium text-gray-900">Iniciar sesión</h1>
-          <p className="mt-2 text-sm text-gray-600">
+          <h1 className="text-3xl font-medium text-[#3B2F2F]">
+            Iniciar sesión
+          </h1>
+          <p className="mt-2 text-sm text-[#3B2F2F]">
             Accede a tu cuenta para continuar
           </p>
         </div>
@@ -83,7 +85,7 @@ export default function LoginForm() {
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="p-8 mt-8 space-y-6 bg-white border border-gray-200 rounded-lg shadow-sm"
+            className="p-8 mt-8 space-y-6 bg-white border border-[#D09E66] rounded-lg shadow-md"
           >
             {form.formState.errors.root && (
               <div className="px-4 py-3 text-sm text-red-600 rounded-md bg-red-50">
@@ -97,7 +99,7 @@ export default function LoginForm() {
                 name="email"
                 render={({ field, fieldState }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-gray-700">
+                    <FormLabel className="text-sm font-medium text-[#3B2F2F]">
                       Correo electrónico
                     </FormLabel>
                     <FormControl>
@@ -105,7 +107,7 @@ export default function LoginForm() {
                         type="email"
                         {...field}
                         className={cn(
-                          "h-12 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500",
+                          "h-12 rounded-lg border-[#D09E66] focus:border-[#3B2F2F] focus:ring-1 focus:ring-[#D09E66]",
                           fieldState.error && "border-red-500"
                         )}
                         autoComplete="email"
@@ -122,7 +124,7 @@ export default function LoginForm() {
                 name="password"
                 render={({ field, fieldState }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-gray-700">
+                    <FormLabel className="text-sm font-medium text-[#3B2F2F]">
                       Contraseña
                     </FormLabel>
                     <FormControl>
@@ -131,7 +133,7 @@ export default function LoginForm() {
                           type={showPassword ? "text" : "password"}
                           {...field}
                           className={cn(
-                            "h-12 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 pr-10",
+                            "h-12 rounded-lg border-[#D09E66] focus:border-[#3B2F2F] focus:ring-1 focus:ring-[#D09E66] pr-10",
                             fieldState.error && "border-red-500"
                           )}
                           autoComplete="current-password"
@@ -139,7 +141,7 @@ export default function LoginForm() {
                         />
                         <button
                           type="button"
-                          className="absolute text-gray-500 -translate-y-1/2 right-3 top-1/2 hover:text-gray-700"
+                          className="absolute text-[#3B2F2F] -translate-y-1/2 right-3 top-1/2 hover:text-[#D09E66]"
                           onClick={() => setShowPassword(!showPassword)}
                           aria-label={
                             showPassword
@@ -163,7 +165,7 @@ export default function LoginForm() {
               <div className="flex items-center justify-end">
                 <a
                   href="/forgot-password"
-                  className="text-sm font-medium text-blue-600 hover:text-blue-500 hover:underline"
+                  className="text-sm font-medium text-[#D09E66] hover:text-[#3B2F2F] hover:underline"
                 >
                   ¿Olvidaste tu contraseña?
                 </a>
@@ -173,7 +175,7 @@ export default function LoginForm() {
             <div>
               <Button
                 type="submit"
-                className="w-full h-12 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                className="w-full h-12 text-sm font-medium text-white bg-[#3B2F2F] rounded-lg hover:bg-[#D09E66] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D09E66] focus-visible:ring-offset-2"
                 disabled={loading}
               >
                 {loading ? (
@@ -189,11 +191,11 @@ export default function LoginForm() {
           </form>
         </Form>
 
-        <div className="text-sm text-center text-gray-600">
+        <div className="text-sm text-center text-[#3B2F2F]">
           ¿No tienes una cuenta?{" "}
           <a
             href="/register"
-            className="font-medium text-blue-600 hover:text-blue-500 hover:underline"
+            className="font-medium text-[#D09E66] hover:text-[#3B2F2F] hover:underline"
           >
             Regístrate
           </a>

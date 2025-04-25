@@ -1,7 +1,6 @@
-// src/pages/dashboard/AdminProducts.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,73 +12,60 @@ import {
 } from "@/components/ui/card";
 import ProductSearchBar from "@/components/dashboard/products/ProductSearchBar";
 import ProductTable from "@/components/dashboard/products/ProductTable";
-import {
-  fetchProducts,
-  createProduct,
-  updateProduct,
-  deleteProduct,
-} from "@/services/productService";
+import AddProductForm from "@/components/dashboard/products/AddProductForm";
+import { useProductStore } from "@/store/productStore";
 import { Product } from "@/types/product";
 
 const AdminProducts = () => {
-  const [products, setProducts] = useState<Product[]>([]);
+  const {
+    products,
+    loading,
+    error,
+    fetchProducts,
+    addProduct,
+    editProduct,
+    removeProduct,
+  } = useProductStore();
+
   const [searchTerm, setSearchTerm] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [isAdding, setIsAdding] = useState(false);
+  const [productToEdit, setProductToEdit] = useState<Product | null>(null);
 
-  /** Carga inicial */
   useEffect(() => {
-    refresh();
-  }, []);
+    fetchProducts();
+  }, [fetchProducts]);
 
-  const refresh = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await fetchProducts();
-      setProducts(data);
-    } catch (err) {
-      setError((err as Error).message);
-    } finally {
-      setLoading(false);
-    }
+  const handleAdd = () => {
+    setProductToEdit(null);
+    setIsAdding(true);
   };
 
-  /** Placeholder para crear producto: abre un modal real en producción */
-  const handleAdd = async () => {
-    try {
-      const nuevo: Partial<Product> = {
-        name: "Nuevo producto",
-        description: "Descripción…",
-        category: "café",
-        price: 0,
-        image: "",
-        available: true,
-        featured: false,
-      };
-      await createProduct(nuevo);
-      await refresh();
-    } catch (err) {
-      alert((err as Error).message);
-    }
+  const handleCloseForm = () => {
+    setIsAdding(false);
+    setProductToEdit(null);
   };
 
-  const handleEdit = async (id: string, data: Partial<Product>) => {
-    try {
-      await updateProduct(id, data);
-      await refresh();
-    } catch (err) {
-      alert((err as Error).message);
+  // Ahora onEdit recibe TODO el producto
+  const handleEdit = (product: Product) => {
+    setProductToEdit(product);
+    setIsAdding(true);
+  };
+
+  const handleSubmit = async (data: Partial<Product>) => {
+    if (productToEdit) {
+      // edición
+      await editProduct(productToEdit.id, data);
+    } else {
+      // creación
+      await addProduct(data);
     }
+    setIsAdding(false);
+    setProductToEdit(null);
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("¿Eliminar producto?")) return;
-    try {
-      await deleteProduct(id);
-      await refresh();
-    } catch (err) {
-      alert((err as Error).message);
+    if (confirm("¿Eliminar producto?")) {
+      await removeProduct(id);
     }
   };
 
@@ -90,20 +76,33 @@ const AdminProducts = () => {
   );
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 bg-white">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-[#4A3520]">Productos</h1>
-        <Button onClick={handleAdd} className="bg-[#8B5A2B] hover:bg-[#6E4A22]">
+        <h1 className="text-3xl font-bold text-gray-900">Productos</h1>
+        <Button
+          onClick={handleAdd}
+          className="text-white bg-blue-600 hover:bg-blue-500"
+        >
           <Plus className="w-4 h-4 mr-2" /> Añadir Producto
         </Button>
       </div>
 
-      <Card>
+      {isAdding && (
+        <AddProductForm
+          productToEdit={productToEdit}
+          onClose={handleCloseForm}
+          onSubmit={handleSubmit}
+        />
+      )}
+
+      <Card className="bg-white rounded-lg shadow-md">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Inventario de Productos</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-xl font-semibold text-gray-900">
+                Inventario de Productos
+              </CardTitle>
+              <CardDescription className="text-sm text-gray-600">
                 Gestiona tu inventario de café y alimentos
               </CardDescription>
             </div>
@@ -122,6 +121,7 @@ const AdminProducts = () => {
               products={filtered}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              isLoading={loading}
             />
           )}
         </CardContent>
