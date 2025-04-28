@@ -1,11 +1,13 @@
 // src/components/sections/cart/CartSummary.tsx
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   PaymentElement,
   useStripe,
   useElements,
 } from "@stripe/react-stripe-js";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 import {
   Card,
   CardHeader,
@@ -16,6 +18,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import { useAuthStore } from "@/store/authStore";
 
 interface CartSummaryProps {
   subtotal: number;
@@ -24,6 +27,9 @@ interface CartSummaryProps {
 const CartSummary = ({ subtotal }: CartSummaryProps) => {
   const stripe = useStripe();
   const elements = useElements();
+  const navigate = useNavigate();
+  const { token } = useAuthStore();
+
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -31,9 +37,20 @@ const CartSummary = ({ subtotal }: CartSummaryProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
+
+    if (!token) {
+      toast.error("Debes iniciar sesión para poder pagar.", {
+        description: "Te llevaremos a la página de inicio de sesión.",
+        duration: 6000,
+      });
+      navigate("/login");
+      return;
+    }
+
     if (!stripe || !elements) return;
 
     setLoading(true);
+
     const { error } = await stripe.confirmPayment({
       elements,
       confirmParams: {
@@ -44,9 +61,18 @@ const CartSummary = ({ subtotal }: CartSummaryProps) => {
 
     if (error) {
       setErrorMsg(error.message ?? "Algo salió mal.");
+      toast.error("Error procesando el pago", {
+        description: error.message ?? "Intenta de nuevo más tarde.",
+        duration: 6000,
+      });
     } else {
       setSuccess(true);
+      toast.success("Pago completado con éxito 🎉", {
+        description: "Estamos confirmando tu orden...",
+        duration: 6000,
+      });
     }
+
     setLoading(false);
   };
 
@@ -70,17 +96,11 @@ const CartSummary = ({ subtotal }: CartSummaryProps) => {
             <span>${subtotal.toFixed(2)}</span>
           </div>
 
-          {/* Aquí Stripe inyecta los iconos de Visa, AmEx, etc. */}
           <div className="p-4 bg-white border border-gray-200 rounded-xl">
             <PaymentElement />
           </div>
 
           {errorMsg && <p className="text-sm text-red-600">{errorMsg}</p>}
-          {success && (
-            <p className="text-sm text-green-600">
-              Pago completado con éxito 🎉
-            </p>
-          )}
         </CardContent>
 
         <Separator />

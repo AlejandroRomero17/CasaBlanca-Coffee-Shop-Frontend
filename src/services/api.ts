@@ -11,7 +11,7 @@ const API = axios.create({
 API.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {
-    console.log("📦 Enviando token:", token); // 👈 útil para debug
+    // console.log("📦 Enviando token:", token); // 👈 útil para debug
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;

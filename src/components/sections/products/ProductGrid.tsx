@@ -8,6 +8,11 @@ import { fetchProducts } from "@/services/productService";
 import { Product } from "@/types/product";
 import { useCartStore } from "@/store/cartStore";
 
+// 👉 Helpers de sesión y auth
+import { isAuthenticated, getUserId } from "@/utils/session";
+// 👉 Servicios de carrito
+import { addToTempCart, addToUserCart } from "@/services/cartService";
+
 const MotionButton = motion(Button);
 
 const ProductCard = ({
@@ -23,27 +28,51 @@ const ProductCard = ({
     margin: "0px 0px -100px 0px",
   });
 
-  const addToCart = useCartStore((s) => s.addItem);
+  // Estado local de “agregado” para mostrar feedback
   const [isAdded, setIsAdded] = useState(false);
 
-  const handleAddToCart = () => {
+  // Acción sobre el store de Zustand
+  const addToCartState = useCartStore((s) => s.addItem);
+
+  const handleAddToCart = async () => {
     if (!product.id) {
       console.error("❌ Producto sin id:", product);
       return;
     }
 
-    console.log("➕ Agregando al carrito:", product.name);
-
-    addToCart({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.image,
+    const payload = {
+      product_id: product.id,
+      product_name: product.name,
+      product_image: product.image,
+      product_price: Number(product.price),
       quantity: 1,
-    });
+    };
 
-    setIsAdded(true);
-    setTimeout(() => setIsAdded(false), 2000);
+    try {
+      if (isAuthenticated()) {
+        // usuario autenticado ➡️ carrito “real”
+        const user_id = getUserId()!;
+        await addToUserCart({ user_id, ...payload });
+      } else {
+        // invitado ➡️ carrito temporal
+        await addToTempCart(payload);
+      }
+
+      // Actualizamos el store local para refrescar UI
+      addToCartState({
+        id: product.id,
+        name: product.name,
+        image: product.image,
+        price: Number(product.price),
+        quantity: 1,
+      });
+
+      // Feedback visual breve
+      setIsAdded(true);
+      setTimeout(() => setIsAdded(false), 2000);
+    } catch (err) {
+      console.error("Error agregando al carrito:", err);
+    }
   };
 
   return (
@@ -153,10 +182,11 @@ const ProductGrid = ({ query, category, priceOrder }: Props) => {
     fetchProducts()
       .then((data) => {
         setProducts(data.filter((p) => p.available));
-        setLoading(false);
       })
       .catch((err) => {
         setError(err.message);
+      })
+      .finally(() => {
         setLoading(false);
       });
   }, []);

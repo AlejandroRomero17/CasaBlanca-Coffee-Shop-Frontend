@@ -1,3 +1,4 @@
+// src/services/authService.ts
 import API from "./api";
 
 interface LoginPayload {
@@ -11,12 +12,26 @@ interface RegisterPayload extends LoginPayload {
 }
 
 export async function login(payload: LoginPayload) {
-  const response = await API.post("/users/login", payload);
+  // Normalizar email
+  const body = {
+    email: payload.email.trim().toLowerCase(),
+    password: payload.password,
+  };
+  console.log("[authService] login payload:", body);
+  const response = await API.post("/users/login", body);
   return response.data;
 }
 
 export async function register(payload: RegisterPayload) {
-  const response = await API.post("/users/register", payload);
+  // Normalizar email
+  const body = {
+    name: payload.name.trim(),
+    email: payload.email.trim().toLowerCase(),
+    password: payload.password,
+    role: payload.role,
+  };
+  console.log("[authService] register payload:", body);
+  const response = await API.post("/users/register", body);
   return response.data;
 }
 

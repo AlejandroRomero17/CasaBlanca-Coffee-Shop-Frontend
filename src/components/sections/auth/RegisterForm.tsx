@@ -1,3 +1,4 @@
+// src/components/sections/auth/RegisterForm.tsx
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -14,7 +15,8 @@ import {
   FormControl,
 } from "@/components/ui/form";
 import { register as registerUser } from "@/services/authService";
-import { useAuthStore } from "@store/authStore";
+import { addToUserCart } from "@/services/cartService";
+import { useAuthStore } from "@/store/authStore";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -22,18 +24,18 @@ import { toast } from "sonner";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+// Store de carrito invitado
+import { useCartStore } from "@/store/cartStore";
+
 const formSchema = z
   .object({
-    name: z
-      .string()
-      .min(2, { message: "Se requieren al menos 2 caracteres" })
-      .max(50),
-    email: z.string().email({ message: "Ingresa un correo válido" }),
+    name: z.string().min(2, "Mínimo 2 caracteres").max(50),
+    email: z.string().email("Ingresa un correo válido"),
     password: z
       .string()
-      .min(8, { message: "Mínimo 8 caracteres" })
-      .regex(/[A-Z]/, { message: "Al menos una mayúscula" })
-      .regex(/[0-9]/, { message: "Al menos un número" }),
+      .min(8, "Mínimo 8 caracteres")
+      .regex(/[A-Z]/, "Al menos una mayúscula")
+      .regex(/[0-9]/, "Al menos un número"),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -48,9 +50,15 @@ export default function RegisterForm() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const setToken = useAuthStore((state) => state.setToken);
-  const setUser = useAuthStore((state) => state.setUser);
+
+  const setToken = useAuthStore((s) => s.setToken);
+  const setUser = useAuthStore((s) => s.setUser);
   const navigate = useNavigate();
+
+  // Del store de invitado:
+  const guestItems = useCartStore((s) => s.items);
+  const clearCart = useCartStore((s) => s.clearCart);
+  const replaceItems = useCartStore((s) => s.replaceItems);
 
   const form = useForm<RegisterValues>({
     resolver: zodResolver(formSchema),
@@ -66,6 +74,7 @@ export default function RegisterForm() {
   const onSubmit = async (values: RegisterValues) => {
     setLoading(true);
     try {
+      // 1) Crear usuario
       const res = await registerUser({
         name: values.name,
         email: values.email,
@@ -73,24 +82,58 @@ export default function RegisterForm() {
       });
       setToken(res.token);
       setUser(res.user);
-      toast.success("Cuenta creada", {
-        description: "Redirigiendo...",
+
+      // 2) Migrar cada ítem del invitado al carrito real
+      await Promise.all(
+        guestItems.map((item) =>
+          addToUserCart({
+            user_id: res.user.id,
+            product_id: item.id,
+            product_name: item.name,
+            product_image: item.image,
+            product_price: item.price,
+            quantity: item.quantity,
+          })
+        )
+      );
+
+      // 3) Limpiar carrito invitado y volcar ítems migrados
+      clearCart();
+      replaceItems(
+        guestItems.map((it) => ({
+          id: it.id,
+          name: it.name,
+          image: it.image,
+          price: it.price,
+          quantity: it.quantity,
+        }))
+      );
+
+      toast.success("Cuenta creada y carrito migrado", {
+        description: "Redirigiendo…",
         position: "top-center",
       });
-      setTimeout(() => navigate("/"), 1500);
-    } catch (error) {
-      const err = error as Error;
+
+      // 4) Redirigir según rol
+      setTimeout(() => {
+        if (res.user.role === "admin") navigate("/dashboard");
+        else navigate("/cart");
+      }, 800);
+    } catch (err: any) {
+      console.error("[RegisterForm] error:", err);
+      toast.error(
+        err.message.includes("already exists")
+          ? "Correo ya registrado"
+          : "Error al registrar",
+        {
+          description: err.message.includes("already exists")
+            ? "Prueba con otro correo o inicia sesión"
+            : "Inténtalo de nuevo más tarde",
+          position: "top-center",
+        }
+      );
       if (err.message.includes("already exists")) {
-        toast.error("Correo ya registrado", {
-          description: "Prueba con otro correo o inicia sesión",
-          position: "top-center",
-        });
         form.setError("email", { message: "Correo ya registrado" });
-      } else {
-        toast.error("Error al registrar", {
-          description: "Inténtalo de nuevo más tarde",
-          position: "top-center",
-        });
       }
     } finally {
       setLoading(false);
@@ -112,19 +155,24 @@ export default function RegisterForm() {
             onSubmit={form.handleSubmit(onSubmit)}
             className="p-8 mt-8 space-y-6 bg-white border border-[#D09E66] rounded-lg shadow-md"
           >
+            {form.formState.errors.root && (
+              <div className="px-4 py-3 text-sm text-red-600 rounded-md bg-red-50">
+                {form.formState.errors.root.message}
+              </div>
+            )}
+
             <div className="space-y-4">
+              {/* Name */}
               <FormField
                 control={form.control}
                 name="name"
                 render={({ field, fieldState }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-[#3B2F2F]">
-                      Nombre completo
-                    </FormLabel>
+                    <FormLabel>Nombre completo</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder=""
                         {...field}
+                        type="text"
                         className={cn(
                           "h-12 rounded-lg border-[#D09E66] focus:border-[#3B2F2F] focus:ring-1 focus:ring-[#D09E66]",
                           fieldState.error && "border-red-500"
@@ -133,24 +181,22 @@ export default function RegisterForm() {
                         aria-invalid={fieldState.invalid}
                       />
                     </FormControl>
-                    <FormMessage className="text-xs text-red-600" />
+                    <FormMessage />
                   </FormItem>
                 )}
               />
 
+              {/* Email */}
               <FormField
                 control={form.control}
                 name="email"
                 render={({ field, fieldState }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-[#3B2F2F]">
-                      Correo electrónico
-                    </FormLabel>
+                    <FormLabel>Correo electrónico</FormLabel>
                     <FormControl>
                       <Input
-                        type="email"
-                        placeholder=""
                         {...field}
+                        type="email"
                         className={cn(
                           "h-12 rounded-lg border-[#D09E66] focus:border-[#3B2F2F] focus:ring-1 focus:ring-[#D09E66]",
                           fieldState.error && "border-red-500"
@@ -159,25 +205,23 @@ export default function RegisterForm() {
                         aria-invalid={fieldState.invalid}
                       />
                     </FormControl>
-                    <FormMessage className="text-xs text-red-600" />
+                    <FormMessage />
                   </FormItem>
                 )}
               />
 
+              {/* Password */}
               <FormField
                 control={form.control}
                 name="password"
                 render={({ field, fieldState }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-[#3B2F2F]">
-                      Contraseña
-                    </FormLabel>
+                    <FormLabel>Contraseña</FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Input
-                          type={showPassword ? "text" : "password"}
-                          placeholder=""
                           {...field}
+                          type={showPassword ? "text" : "password"}
                           className={cn(
                             "h-12 rounded-lg border-[#D09E66] focus:border-[#3B2F2F] focus:ring-1 focus:ring-[#D09E66] pr-10",
                             fieldState.error && "border-red-500"
@@ -187,44 +231,34 @@ export default function RegisterForm() {
                         />
                         <button
                           type="button"
-                          className="absolute text-[#3B2F2F] -translate-y-1/2 right-3 top-1/2 hover:text-[#D09E66]"
-                          onClick={() => setShowPassword(!showPassword)}
-                          aria-label={
-                            showPassword
-                              ? "Ocultar contraseña"
-                              : "Mostrar contraseña"
-                          }
+                          onClick={() => setShowPassword((p) => !p)}
+                          className="absolute -translate-y-1/2 right-3 top-1/2"
                         >
                           {showPassword ? (
-                            <EyeOff className="w-5 h-5" />
+                            <EyeOff className="text-[#3B2F2F]" />
                           ) : (
-                            <Eye className="w-5 h-5" />
+                            <Eye className="text-[#3B2F2F]" />
                           )}
                         </button>
                       </div>
                     </FormControl>
-                    <FormMessage className="text-xs text-red-600" />
-                    <div className="mt-1 text-xs text-gray-500">
-                      Mínimo 8 caracteres con mayúscula y número
-                    </div>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
 
+              {/* Confirm Password */}
               <FormField
                 control={form.control}
                 name="confirmPassword"
                 render={({ field, fieldState }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-[#3B2F2F]">
-                      Confirmar contraseña
-                    </FormLabel>
+                    <FormLabel>Confirmar contraseña</FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Input
-                          type={showConfirmPassword ? "text" : "password"}
-                          placeholder=""
                           {...field}
+                          type={showConfirmPassword ? "text" : "password"}
                           className={cn(
                             "h-12 rounded-lg border-[#D09E66] focus:border-[#3B2F2F] focus:ring-1 focus:ring-[#D09E66] pr-10",
                             fieldState.error && "border-red-500"
@@ -234,58 +268,48 @@ export default function RegisterForm() {
                         />
                         <button
                           type="button"
-                          className="absolute text-[#3B2F2F] -translate-y-1/2 right-3 top-1/2 hover:text-[#D09E66]"
-                          onClick={() =>
-                            setShowConfirmPassword(!showConfirmPassword)
-                          }
-                          aria-label={
-                            showConfirmPassword
-                              ? "Ocultar contraseña"
-                              : "Mostrar contraseña"
-                          }
+                          onClick={() => setShowConfirmPassword((p) => !p)}
+                          className="absolute -translate-y-1/2 right-3 top-1/2"
                         >
                           {showConfirmPassword ? (
-                            <EyeOff className="w-5 h-5" />
+                            <EyeOff className="text-[#3B2F2F]" />
                           ) : (
-                            <Eye className="w-5 h-5" />
+                            <Eye className="text-[#3B2F2F]" />
                           )}
                         </button>
                       </div>
                     </FormControl>
-                    <FormMessage className="text-xs text-red-600" />
+                    <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
 
-            <div>
-              <Button
-                type="submit"
-                className="w-full h-12 text-sm font-medium text-white bg-[#3B2F2F] rounded-lg hover:bg-[#D09E66] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D09E66] focus-visible:ring-offset-2"
-                disabled={loading}
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full h-12 text-white bg-[#3B2F2F] rounded-lg hover:bg-[#D09E66]"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Creando…
+                </>
+              ) : (
+                "Crear cuenta"
+              )}
+            </Button>
+
+            <div className="text-sm text-center text-[#3B2F2F]">
+              ¿Ya tienes una cuenta?{" "}
+              <a
+                href="/login"
+                className="font-medium text-[#D09E66] hover:underline"
               >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Creando cuenta...
-                  </>
-                ) : (
-                  "Crear cuenta"
-                )}
-              </Button>
+                Inicia sesión
+              </a>
             </div>
           </form>
         </Form>
-
-        <div className="text-sm text-center text-[#3B2F2F]">
-          ¿Ya tienes una cuenta?{" "}
-          <a
-            href="/login"
-            className="font-medium text-[#D09E66] hover:text-[#3B2F2F] hover:underline"
-          >
-            Inicia sesión
-          </a>
-        </div>
       </div>
     </div>
   );

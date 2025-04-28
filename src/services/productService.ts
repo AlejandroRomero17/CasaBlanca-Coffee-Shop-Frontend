@@ -5,7 +5,7 @@ import { useAuthStore } from "@/store/authStore"; // Asegúrate de importar el s
 // Wrapper que maneja errores de red y parsea JSON
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
   const token = useAuthStore.getState().token; // Obtener el token desde el authStore
-  console.log("Token en la petición:", token); // Verificamos que el token esté presente
+  // console.log("Token en la petición:", token); // Verificamos que el token esté presente
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",

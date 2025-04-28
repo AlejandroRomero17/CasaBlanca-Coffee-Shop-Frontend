@@ -1,10 +1,8 @@
+// src/store/cartStore.ts
+
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-
-// Función para generar un sessionId
-const generateSessionId = () => {
-  return `session-${Math.random().toString(36).substr(2, 9)}`;
-};
+import { getSessionId } from "@/utils/session"; // Unificamos sesión
 
 export type CartItem = {
   id: string;
@@ -22,15 +20,18 @@ type CartStore = {
   removeItem: (id: string) => void;
   updateQuantity: (id: string, qty: number) => void;
   replaceItems: (items: CartItem[]) => void;
+  clearCart: () => void;
 };
 
 export const useCartStore = create<CartStore>()(
   persist(
     (set) => ({
-      sessionId: localStorage.getItem("session_id") || generateSessionId(),
+      // Siempre usamos getSessionId() para sincronizar con utils/session
+      sessionId: getSessionId(),
       items: [],
 
       setSessionId: (id) => {
+        // Refleja tanto en localStorage.session_id como en el store
         localStorage.setItem("session_id", id);
         set({ sessionId: id });
       },
@@ -61,7 +62,13 @@ export const useCartStore = create<CartStore>()(
         })),
 
       replaceItems: (items) => set({ items }),
+
+      clearCart: () => set({ items: [] }),
     }),
-    { name: "cart-storage" } // Persistir en localStorage
+    {
+      name: "cart-storage",
+      // Sólo persistimos los items; sessionId viene de utils/session
+      partialize: (state) => ({ items: state.items }),
+    }
   )
 );

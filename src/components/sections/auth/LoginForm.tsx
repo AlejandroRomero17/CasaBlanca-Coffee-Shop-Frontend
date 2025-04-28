@@ -1,3 +1,4 @@
+// src/components/sections/auth/LoginForm.tsx
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -14,7 +15,9 @@ import {
   FormControl,
 } from "@/components/ui/form";
 import { login } from "@/services/authService";
-import { useAuthStore } from "@store/authStore";
+import { addToUserCart, getUserCart } from "@/services/cartService"; // 👈 añadimos getUserCart
+import { useAuthStore } from "@/store/authStore";
+import { useCartStore } from "@/store/cartStore";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -26,45 +29,81 @@ const formSchema = z.object({
   email: z.string().email({ message: "Ingresa un correo válido" }),
   password: z.string().min(6, { message: "Mínimo 6 caracteres" }),
 });
-
 type LoginValues = z.infer<typeof formSchema>;
 
 export default function LoginForm() {
   useAuthRedirect();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const setToken = useAuthStore((state) => state.setToken);
-  const setUser = useAuthStore((state) => state.setUser);
+
+  const setToken = useAuthStore((s) => s.setToken);
+  const setUser = useAuthStore((s) => s.setUser);
+
+  // Ítems en memoria (guest)
+  const { items: guestItems, clearCart, replaceItems } = useCartStore();
   const navigate = useNavigate();
 
   const form = useForm<LoginValues>({
     resolver: zodResolver(formSchema),
     mode: "onBlur",
-    defaultValues: {
-      email: "",
-      password: "",
-    },
+    defaultValues: { email: "", password: "" },
   });
 
   const onSubmit = async (values: LoginValues) => {
     setLoading(true);
     try {
+      // 1) Login
       const res = await login(values);
+      console.log("[LoginForm] login success:", res);
       setToken(res.token);
       setUser(res.user);
-      toast.success("Sesión iniciada", {
-        description: "Redirigiendo a tu cuenta...",
+
+      // 2) Migramos cada ítem invitado al carrito real
+      for (const item of guestItems) {
+        console.log("[LoginForm] migrando item:", item);
+        await addToUserCart({
+          user_id: res.user.id,
+          product_id: item.id,
+          product_name: item.name,
+          product_image: item.image,
+          product_price: item.price,
+          quantity: item.quantity,
+        });
+      }
+
+      // 3) Limpiamos el store (guest)
+      clearCart();
+
+      // 4) Volvemos a consultar el carrito real y lo volcamos al store
+      const backendCart = await getUserCart(res.user.id);
+      console.log("[LoginForm] carrito real tras migración:", backendCart);
+      replaceItems(
+        backendCart.map((it) => ({
+          id: it.id_cart,
+          name: it.product_name,
+          image: it.product_image,
+          price: Number(it.product_price),
+          quantity: it.quantity,
+        }))
+      );
+
+      // 5) Feedback y redirección
+      toast.success("Sesión iniciada y carrito sincronizado", {
+        description: "Redirigiendo…",
         position: "top-center",
       });
-      setTimeout(() => navigate("/"), 1000);
-    } catch {
+
+      setTimeout(() => {
+        if (res.user.role === "admin") navigate("/dashboard");
+        else navigate("/cart");
+      }, 800);
+    } catch (err: any) {
+      console.error("[LoginForm] error:", err);
       toast.error("Credenciales incorrectas", {
         description: "Verifica tu correo y contraseña",
         position: "top-center",
       });
-      form.setError("root", {
-        message: "Correo o contraseña incorrectos",
-      });
+      form.setError("root", { message: "Correo o contraseña incorrectos" });
     } finally {
       setLoading(false);
     }
@@ -142,7 +181,7 @@ export default function LoginForm() {
                         <button
                           type="button"
                           className="absolute text-[#3B2F2F] -translate-y-1/2 right-3 top-1/2 hover:text-[#D09E66]"
-                          onClick={() => setShowPassword(!showPassword)}
+                          onClick={() => setShowPassword((p) => !p)}
                           aria-label={
                             showPassword
                               ? "Ocultar contraseña"
@@ -161,27 +200,17 @@ export default function LoginForm() {
                   </FormItem>
                 )}
               />
-
-              <div className="flex items-center justify-end">
-                <a
-                  href="/forgot-password"
-                  className="text-sm font-medium text-[#D09E66] hover:text-[#3B2F2F] hover:underline"
-                >
-                  ¿Olvidaste tu contraseña?
-                </a>
-              </div>
             </div>
 
             <div>
               <Button
                 type="submit"
-                className="w-full h-12 text-sm font-medium text-white bg-[#3B2F2F] rounded-lg hover:bg-[#D09E66] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D09E66] focus-visible:ring-offset-2"
                 disabled={loading}
+                className="w-full h-12 text-sm font-medium text-white bg-[#3B2F2F] rounded-lg hover:bg-[#D09E66]"
               >
                 {loading ? (
                   <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Iniciando sesión...
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Iniciando…
                   </>
                 ) : (
                   "Iniciar sesión"
@@ -195,7 +224,7 @@ export default function LoginForm() {
           ¿No tienes una cuenta?{" "}
           <a
             href="/register"
-            className="font-medium text-[#D09E66] hover:text-[#3B2F2F] hover:underline"
+            className="font-medium text-[#D09E66] hover:text-[#3B2F2F] underline"
           >
             Regístrate
           </a>
