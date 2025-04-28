@@ -1,5 +1,3 @@
-// src/components/dashboard/products/ProductTableRow.tsx
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,11 +8,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Coffee, Edit, MoreHorizontal, Trash, AlertCircle } from "lucide-react";
 import { Product } from "@/types/product";
 
-// Extendemos Product para incluir stock opcional sin usar `any`
 interface ProductWithStock extends Product {
   stock?: number;
 }
@@ -26,7 +22,6 @@ interface Props {
 }
 
 const ProductTableRow = ({ product, onEdit, onDelete }: Props) => {
-  // Ahora stock viene tipado correctamente
   const stock = product.stock ?? 0;
   const status = !product.available
     ? "Sin stock"
@@ -34,71 +29,69 @@ const ProductTableRow = ({ product, onEdit, onDelete }: Props) => {
     ? "Bajo stock"
     : "Disponible";
 
-  const variant =
-    status === "Disponible"
-      ? "default"
-      : status === "Bajo stock"
-      ? "outline"
-      : "destructive";
+  // Colores sencillos para el badge
+  const statusStyles = {
+    Disponible: "bg-blue-100 text-blue-800",
+    "Bajo stock": "bg-yellow-100 text-yellow-800",
+    "Sin stock": "bg-red-100 text-red-800",
+  } as const;
 
   return (
-    <TableRow className="transition-all hover:bg-muted/10">
-      <TableCell className="px-3 py-4 text-sm font-medium text-muted-foreground">
-        <div className="flex items-center gap-x-2">
-          <Coffee className="w-5 h-5 text-muted-foreground" />
+    <TableRow className="transition-colors hover:bg-gray-100">
+      <TableCell className="px-4 py-2 text-sm text-black">
+        <div className="flex items-center gap-2">
+          <Coffee className="w-5 h-5 text-black" />
           {product.name}
         </div>
       </TableCell>
-      <TableCell className="px-3 py-4 text-sm text-muted-foreground">
+      <TableCell className="px-4 py-2 text-sm text-black">
         {product.category}
       </TableCell>
-      <TableCell className="px-3 py-4 text-sm text-muted-foreground">
+      <TableCell className="px-4 py-2 text-sm text-black">
         ${Number(product.price).toFixed(2)}
       </TableCell>
-      <TableCell className="px-3 py-4 text-sm text-muted-foreground">
-        {stock}
-      </TableCell>
-      <TableCell className="px-3 py-4">
-        <Badge variant={variant} className="px-3 py-1 text-xs w-fit">
-          {status === "Sin stock" ? (
-            <AlertCircle className="w-3 h-3 text-red-500" />
-          ) : status === "Bajo stock" ? (
-            <AlertCircle className="w-3 h-3 text-yellow-500" />
-          ) : (
-            <span className="w-3 h-3 text-green-500">✔️</span>
-          )}
+      <TableCell className="px-4 py-2 text-sm text-black">{stock}</TableCell>
+      <TableCell className="px-4 py-2">
+        <span
+          className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded ${statusStyles[status]}`}
+        >
+          {status === "Sin stock" && <AlertCircle className="w-4 h-4 mr-1" />}
+          {status === "Bajo stock" && <AlertCircle className="w-4 h-4 mr-1" />}
+          {status === "Disponible" && <span className="w-4 h-4 mr-1">✔️</span>}
           {status}
-        </Badge>
+        </span>
       </TableCell>
-      <TableCell className="px-3 py-4 text-right">
+      <TableCell className="px-4 py-2 text-right">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
-              variant="ghost"
+              variant="outline"
               size="icon"
-              aria-controls={`menu-${product.id}`}
+              className="text-black bg-white border border-gray-300 hover:bg-gray-50"
             >
-              <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
+              <MoreHorizontal className="w-4 h-4" />
               <span className="sr-only">Abrir menú</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="end"
-            aria-labelledby={`menu-${product.id}`}
+            className="bg-white border border-gray-200 shadow"
           >
-            <DropdownMenuLabel className="text-sm">Acciones</DropdownMenuLabel>
+            <DropdownMenuLabel className="px-3 py-1 text-sm text-black">
+              Acciones
+            </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => onEdit(product)}
-              className="transition-all rounded-md hover:bg-muted/50"
+              className="flex items-center px-3 py-2 text-sm text-black hover:bg-gray-100"
             >
-              <Edit className="w-4 h-4 mr-2 text-muted-foreground" /> Editar
+              <Edit className="w-4 h-4 mr-2" /> Editar
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => onDelete(product.id)}
-              className="transition-all rounded-md text-destructive hover:bg-muted/50"
+              className="flex items-center px-3 py-2 text-sm text-red-600 hover:bg-gray-100"
             >
-              <Trash className="w-4 h-4 mr-2 text-muted-foreground" /> Eliminar
+              <Trash className="w-4 h-4 mr-2" /> Eliminar
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

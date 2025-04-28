@@ -13,10 +13,10 @@ import {
 } from "lucide-react";
 
 const links = [
-  { name: "Resumen", href: "/admin", icon: LayoutDashboard },
-  { name: "Productos", href: "/admin/products", icon: Package },
-  { name: "Ventas", href: "/admin/sales", icon: DollarSign },
-  { name: "Pedidos", href: "/admin/orders", icon: ShoppingBag },
+  { name: "Resumen", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Productos", href: "/dashboard/products", icon: Package },
+  { name: "Ventas", href: "/dashboard/sales", icon: DollarSign },
+  { name: "Pedidos", href: "/dashboard/orders", icon: ShoppingBag },
 ];
 
 const AdminSidebar = () => {

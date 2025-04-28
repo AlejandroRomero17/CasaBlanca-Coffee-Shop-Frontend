@@ -1,3 +1,4 @@
+// src/router/routes/adminRoutes.tsx
 import { Route } from "react-router-dom";
 import AdminRoute from "../AdminRoute";
 import AdminLayout from "@/layouts/AdminLayout";
@@ -9,10 +10,10 @@ import AdminProducts from "@/pages/dashboard/AdminProducts";
 export const adminRoutes = (
   <Route element={<AdminRoute />}>
     <Route element={<AdminLayout />}>
-      <Route path="/admin" element={<AdminDashboard />} />
-      <Route path="/admin/orders" element={<AdminOrders />} />
-      <Route path="/admin/sales" element={<AdminSales />} />
-      <Route path="/admin/products" element={<AdminProducts />} />
+      <Route path="/dashboard" element={<AdminDashboard />} />
+      <Route path="/dashboard/orders" element={<AdminOrders />} />
+      <Route path="/dashboard/sales" element={<AdminSales />} />
+      <Route path="/dashboard/products" element={<AdminProducts />} />
     </Route>
   </Route>
 );

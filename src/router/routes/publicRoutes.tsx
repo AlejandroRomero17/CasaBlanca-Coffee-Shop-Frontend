@@ -1,13 +1,14 @@
 // src/router/routes/publicRoutes.tsx
+import { Route } from "react-router-dom";
 import PublicLayout from "@/layouts/PublicLayout";
-import Article from "@/pages/public/Article";
-import Blog from "@/pages/public/Blog";
-import Contact from "@/pages/public/Contact";
 import Home from "@/pages/public/Home";
 import Lounge from "@/pages/public/Lounge";
 import Products from "@/pages/public/Products";
+import Contact from "@/pages/public/Contact";
+import Blog from "@/pages/public/Blog";
+import Article from "@/pages/public/Article";
 import Subscription from "@/pages/public/Subscription";
-import { Route } from "react-router-dom";
+import Cart from "@/pages/private/Cart"; // 👈 importa el Cart aquí (aunque esté en /private/Cart)
 
 export const publicRoutes = (
   <Route element={<PublicLayout />}>
@@ -18,5 +19,6 @@ export const publicRoutes = (
     <Route path="/blog" element={<Blog />} />
     <Route path="/blog/:slug" element={<Article />} />
     <Route path="/suscripcion" element={<Subscription />} />
+    <Route path="/cart" element={<Cart />} /> {/* 👈 ahora cart es público */}
   </Route>
 );
