@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { ShoppingCart } from "lucide-react";
 import clsx from "clsx";
 import { fetchProducts } from "@/services/productService";
-import { Product } from "@/types/product";
-import { useCartStore } from "@/store/cartStore";
+import { addToCart } from "@/services/cartService";
+import { useCart } from "@/context/CartContext";
+import type { Product } from "@/types/product";
 
 // 👉 Helpers de sesión y auth
 import { isAuthenticated, getUserId } from "@/utils/session";
@@ -138,25 +139,25 @@ const ProductCard = ({
             transition={{ duration: 0.4, delay: index * 0.1 + 0.5 }}
           >
             <span className="font-medium text-[#3B2F2F]">
-              ${product.price.toFixed(2)}
+              ${Number(product.price).toFixed(2)}
             </span>
 
             <MotionButton
+              disabled={adding}
               size="sm"
               onClick={handleAddToCart}
               aria-label={`Agregar ${product.name} al carrito`}
               className={clsx(
-                "rounded-full px-4 py-2 text-sm flex gap-1.5 items-center transition-all duration-300 transform",
-                isAdded
-                  ? "bg-green-600 text-white hover:bg-green-700"
-                  : "bg-[#3B2F2F] hover:bg-[#5a4038] text-[#f5e8db]"
+                "bg-[#3B2F2F] hover:bg-[#5a4038] text-[#f5e8db] rounded-full",
+                "px-4 py-2 text-sm flex gap-1.5 items-center mt-4",
+                "transition-all duration-300 transform hover:scale-105",
+                "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5a4038]",
+                adding && "opacity-60 cursor-wait"
               )}
               whileTap={{ scale: 0.95 }}
             >
               <ShoppingCart size={16} strokeWidth={2} />
-              <span className="hidden sm:inline">
-                {isAdded ? "Agregado" : "Agregar"}
-              </span>
+              <span className="hidden sm:inline">{adding ? 'Agregando...' : 'Agregar'}</span>
             </MotionButton>
           </motion.div>
         </div>
@@ -165,9 +166,7 @@ const ProductCard = ({
   );
 };
 
-type Props = { query: string; category: string; priceOrder: string };
-
-const ProductGrid = ({ query, category, priceOrder }: Props) => {
+const ProductGrid = ({ filters = {}, query = "", category = "", priceOrder = "" }) => {
   const sectionRef = useRef(null);
   const isVisible = useInView(sectionRef, {
     once: true,
@@ -189,21 +188,23 @@ const ProductGrid = ({ query, category, priceOrder }: Props) => {
       .finally(() => {
         setLoading(false);
       });
-  }, []);
+  }, [filters]);
+
+  
+  const normalize = (str: string) =>
+    str.normalize('NFD').replace(/[00-\u036f]/g, '').toLowerCase();
 
   const filtered = products
     .filter(
       (p) =>
         (!query || p.name.toLowerCase().includes(query.toLowerCase())) &&
-        (!category || p.category === category)
+        (!category || normalize(p.category) === normalize(category))
     )
-    .sort((a, b) =>
-      priceOrder === "asc"
-        ? a.price - b.price
-        : priceOrder === "desc"
-        ? b.price - a.price
-        : 0
-    );
+    .sort((a, b) => {
+      if (priceOrder === "asc") return Number(a.price) - Number(b.price);
+      if (priceOrder === "desc") return Number(b.price) - Number(a.price);
+      return 0;
+    });
 
   if (loading)
     return <div className="py-10 text-center">Cargando productos…</div>;

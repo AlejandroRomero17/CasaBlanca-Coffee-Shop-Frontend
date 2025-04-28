@@ -5,9 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import clsx from "clsx";
 import { Menu, ShoppingCart, X } from "lucide-react";
-import { useCartStore } from "@/store/cartStore";
 import { fetchProducts } from "@/services/productService";
 import { Product } from "@/types/product";
+import { useCart } from "../../context/CartContext";
+import { useAuthStore } from "@store/authStore";
+
 const navLinks = [
   { name: "Inicio", href: "/" },
   { name: "Nuestros productos", href: "/products" },
@@ -23,14 +25,13 @@ interface NavbarProps {
 export function Navbar({ isMenuOpen, onMenuClick }: NavbarProps) {
   const location = useLocation();
   const navigate = useNavigate();
+  const { itemCount } = useCart();
   const [search, setSearch] = useState("");
   const [results, setResults] = useState<Product[]>([]);
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [bounce, setBounce] = useState(false);
-
-  const cartCount = useCartStore((state) =>
-    state.items.reduce((acc, item) => acc + item.quantity, 0)
-  );
+  const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
 
   useEffect(() => {
     fetchProducts().then(setAllProducts).catch(console.error);
@@ -45,12 +46,12 @@ export function Navbar({ isMenuOpen, onMenuClick }: NavbarProps) {
   }, [search, allProducts]);
 
   useEffect(() => {
-    if (cartCount > 0) {
+    if (itemCount > 0) {
       setBounce(true);
       const timer = setTimeout(() => setBounce(false), 500);
       return () => clearTimeout(timer);
     }
-  }, [cartCount]);
+  }, [itemCount]);
 
   const renderLinks = (onClick?: () => void) => (
     <ul role="menubar" className="flex flex-col md:flex-row md:space-x-6">
@@ -96,7 +97,7 @@ export function Navbar({ isMenuOpen, onMenuClick }: NavbarProps) {
         {/* LINKS DESKTOP */}
         <div className="items-center hidden md:flex">{renderLinks()}</div>
 
-        {/* SEARCH + CART */}
+        {/* SEARCH + CART + LOGOUT */}
         <div className="relative items-center hidden space-x-3 md:flex">
           <Input
             value={search}
@@ -112,7 +113,7 @@ export function Navbar({ isMenuOpen, onMenuClick }: NavbarProps) {
                   key={item.id}
                   onClick={() => {
                     setSearch("");
-                    navigate("/products"); // Puedes redirigir o usar un modal, etc.
+                    navigate("/products");
                   }}
                   className="flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-gray-100"
                 >
@@ -141,24 +142,38 @@ export function Navbar({ isMenuOpen, onMenuClick }: NavbarProps) {
                 className="group relative hover:bg-[#D09E66]/20"
               >
                 <ShoppingCart className="w-5 h-5 text-white transition-transform group-hover:scale-110" />
-                {cartCount > 0 && (
-                  <motion.span
-                    className="absolute w-4 h-4 text-[10px] font-semibold text-white bg-[#D09E66] rounded-full flex items-center justify-center -top-1 -right-1"
-                    animate={
-                      bounce
-                        ? {
-                            scale: [1, 1.5, 1],
-                            backgroundColor: ["#D09E66", "#A0744F", "#D09E66"],
-                          }
-                        : {}
-                    }
-                  >
-                    {cartCount}
-                  </motion.span>
-                )}
+                <motion.span
+                  className="absolute inline-flex items-center justify-center w-4 h-4 text-[10px] font-semibold text-white bg-[#D09E66] rounded-full -top-1 -right-1"
+                  aria-live="polite"
+                  animate={
+                    bounce
+                      ? {
+                          scale: [1, 1.5, 1],
+                          backgroundColor: ["#D09E66", "#A0744F", "#D09E66"],
+                        }
+                      : {}
+                  }
+                >
+                  {itemCount}
+                </motion.span>
               </Button>
             </motion.div>
           </Link>
+
+          {/* BOTÓN DE CERRAR SESIÓN */}
+          {user && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="ml-2 text-white border-white hover:bg-[#D09E66]/20 hover:text-[#D09E66]"
+              onClick={() => {
+                logout();
+                navigate("/login");
+              }}
+            >
+              Cerrar sesión
+            </Button>
+          )}
         </div>
 
         {/* MENU ICON */}

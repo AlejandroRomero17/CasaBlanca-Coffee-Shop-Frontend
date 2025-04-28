@@ -1,52 +1,52 @@
-// src/pages/pivate/Cart.tsx
+// src/pages/Cart.tsx
+import { useState } from "react";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
-import { useEffect } from "react";
 import CartHeader from "@/components/sections/cart/CartHeader";
-import CartList from "@/components/sections/cart/CartList";
+import CartList, { CartItemType } from "@/components/sections/cart/CartList";
 import CartSummary from "@/components/sections/cart/CartSummary";
 import EmptyCart from "@/components/sections/cart/EmptyCart";
-import { useCartStore } from "@/store/cartStore";
+import { useCart } from "@/context/CartContext";
+import { useAuthStore } from "@/store/authStore";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_KEY!);
 
 const Cart = () => {
-  const items = useCartStore((state) => state.items);
+  const [loading, setLoading] = useState(false);
+  const { items, refreshCart } = useCart();
+  const { user } = useAuthStore();
 
   // Debug: log items en esta página
   useEffect(() => {
     // console.log("📋 Items en Cart page:", items);
   }, [items]);
 
-  const itemCount = items.reduce((sum, i) => sum + i.quantity, 0);
-  const subtotal = items.reduce((sum, i) => sum + i.quantity * i.price, 0);
+  if (loading) {
+    return <div>Cargando carrito...</div>;
+  }
 
   if (items.length === 0) {
     return <EmptyCart />;
   }
 
   return (
-    <main className="w-full min-h-screen px-4 py-16 bg-gray-50 md:py-24">
-      <div className="max-w-screen-xl mx-auto space-y-8">
-        <CartHeader itemCount={itemCount} />
-        <div className="flex flex-col gap-8 lg:flex-row">
-          {/* LISTADO */}
-          <div className="flex-1 p-6 bg-white rounded-lg shadow">
-            <CartList />
-          </div>
-          {/* RESUMEN + PAGO */}
-          <div className="lg:w-[28rem]">
-            <Elements
-              stripe={stripePromise}
-              options={{
-                mode: "payment",
-                amount: Math.round(subtotal * 100), // en centavos
-                currency: "usd",
-              }}
-            >
-              <CartSummary subtotal={subtotal} />
-            </Elements>
-          </div>
+    <main className="flex flex-col min-h-screen bg-gradient-to-br from-[#f9e8d9] to-[#fcefe2]">
+      <CartHeader itemCount={itemCount} />
+      <div className="flex flex-col lg:flex-row gap-8 max-w-7xl mx-auto w-full px-4 py-8">
+        <div className="flex-1">
+          <CartList items={items} onUpdate={() => {}} refreshCart={refreshCart} />
+        </div>
+        <div className="lg:w-[28rem]">
+          <Elements
+            stripe={stripePromise}
+            options={{
+              mode: "payment",
+              amount: !isNaN(subtotal) && subtotal > 0 ? Math.round(subtotal * 100) : 1,
+              currency: "mxn",
+            }}
+          >
+            <CartSummary subtotal={subtotal} />
+          </Elements>
         </div>
       </div>
     </main>

@@ -8,13 +8,19 @@ import { useNavigate } from "react-router-dom";
 import { ProfileOrder } from "@/types/order";
 
 export default function ProfilePage() {
-  const { user, setUser, logout } = useAuthStore();
+  const { user, token, logout } = useAuthStore();
   const [orders, setOrders] = useState<ProfileOrder[]>([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchData = async () => {
+    if (!token) {
+      console.log("[ProfilePage] No token, redirigiendo...");
+      navigate("/login", { replace: true });
+      return;
+    }
+
+    const fetchOrders = async () => {
       setLoading(true);
       try {
         if (!user) {
@@ -26,14 +32,14 @@ export default function ProfilePage() {
       } catch (err) {
         console.error("Error fetching profile:", err);
         logout();
-        navigate("/login");
+        navigate("/login", { replace: true });
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
-  }, [user, setUser, logout, navigate]);
+    fetchOrders();
+  }, [token, logout, navigate]);
 
   if (loading || !user) {
     return (

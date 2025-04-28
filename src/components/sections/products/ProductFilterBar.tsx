@@ -1,44 +1,66 @@
-// src/components/sections/products/ProductFilterBar.tsx
-import { Button } from "@/components/ui/button";
+  // src/components/sections/products/ProductFilterBar.tsx
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
   Select,
-  SelectContent,
-  SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectContent,
+  SelectItem,
 } from "@/components/ui/select";
 import { ChevronDown, Search, X } from "lucide-react";
 
+export type ProductFilters = {
+  search?: string;
+  category?: string;
+  priceOrder?: string;
+  sort?: string;
+};
+
 interface ProductFilterBarProps {
-  query: string;
-  setQuery: (value: string) => void;
-  category: string;
-  setCategory: (value: string) => void;
-  priceOrder: string;
-  setPriceOrder: (value: string) => void;
+  filters: ProductFilters;
+  setFilters: React.Dispatch<React.SetStateAction<ProductFilters>>;
 }
 
 const categoryLabels: Record<string, string> = {
-  café: "Café",
-  bebidas: "Bebidas",
+  cafe: "Café en grano",
+  tes: "Tés exóticos",
   postres: "Postres",
   desayunos: "Desayunos",
-  almuerzos: "Almuerzos",
+  merch: "Merchandising",
 };
 
-const ProductFilterBar = ({
-  query,
-  setQuery,
-  category,
-  setCategory,
-  priceOrder,
-  setPriceOrder,
-}: ProductFilterBarProps) => {
+
+function normalizeCategory(cat: string) {
+  if (cat === "cafe_en_grano" || cat === "café_en_grano") return "cafe";
+  return cat;
+}
+
+const ProductFilterBar: React.FC<ProductFilterBarProps> = ({ filters = {}, setFilters }) => {
+  if (typeof setFilters !== 'function') {
+    throw new Error("ProductFilterBar: setFilters prop must be a function");
+  }
+  const [query, setQuery] = useState(filters?.search || "");
+  const [category, setCategory] = useState(filters?.category || "");
+  const [priceOrder, setPriceOrder] = useState(filters?.priceOrder || "");
+  const [recent, setRecent] = useState(filters?.sort === "recent");
+
+  useEffect(() => {
+    setFilters({
+      search: query,
+      category: normalizeCategory(category),
+      priceOrder,
+      sort: recent ? "recent" : undefined,
+    });
+    // eslint-disable-next-line
+  }, [query, category, priceOrder, recent]);
+
   const clearAll = () => {
     setQuery("");
     setCategory("");
     setPriceOrder("");
+    setRecent(false);
   };
 
   return (
@@ -70,7 +92,7 @@ const ProductFilterBar = ({
                 <SelectItem
                   key={key}
                   value={key}
-                  className="text-[#3B2F2F] hover:bg-[#f4e8d7] focus:bg-[#f4e8d7] capitalize"
+                  className="text-[#3B2F2F] hover:bg-[#f4e8d7] focus:bg-[#f4e8d7]"
                 >
                   {label}
                 </SelectItem>
@@ -107,7 +129,8 @@ const ProductFilterBar = ({
           {/* Más recientes */}
           <Button
             variant="outline"
-            className="border-[#b59f84] text-[#3B2F2F] hover:bg-[#f4e8d7] rounded-full text-sm px-4 py-2"
+            className={`border-[#b59f84] text-[#3B2F2F] hover:bg-[#f4e8d7] rounded-full text-sm px-4 py-2 ${recent ? "bg-[#f4e8d7]" : ""}`}
+            onClick={() => setRecent((r) => !r)}
           >
             Más recientes
           </Button>
@@ -115,7 +138,7 @@ const ProductFilterBar = ({
       </div>
 
       {/* Filter chips */}
-      {(query || category || priceOrder) && (
+      {(query || category || priceOrder || recent) && (
         <div className="flex flex-wrap items-center max-w-6xl gap-2 px-6 mx-auto mt-4 md:px-20">
           {query && (
             <span className="inline-flex items-center bg-[#c58c5c]/20 text-[#3B2F2F] px-3 py-1 rounded-full text-sm">
@@ -144,6 +167,16 @@ const ProductFilterBar = ({
                 className="w-4 h-4 ml-1 cursor-pointer text-[#3B2F2F] hover:text-[#b2594a]"
                 onClick={() => setPriceOrder("")}
                 aria-label="Eliminar orden de precio"
+              />
+            </span>
+          )}
+          {recent && (
+            <span className="inline-flex items-center bg-[#c58c5c]/20 text-[#3B2F2F] px-3 py-1 rounded-full text-sm">
+              Más recientes
+              <X
+                className="w-4 h-4 ml-1 cursor-pointer text-[#3B2F2F] hover:text-[#b2594a]"
+                onClick={() => setRecent(false)}
+                aria-label="Eliminar orden de fecha"
               />
             </span>
           )}

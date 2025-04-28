@@ -5,6 +5,7 @@ import { BrowserRouter } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { Elements } from "@stripe/react-stripe-js";
 import { stripePromise } from "@/lib/stripe";
+import { CartProvider } from "@/context/CartContext";
 import "./index.css";
 import App from "./App.tsx";
 import { Toaster } from "sonner"; // ✅ Toast elegante

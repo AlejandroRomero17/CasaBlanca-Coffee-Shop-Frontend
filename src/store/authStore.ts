@@ -1,12 +1,11 @@
-// src/store/authStore.ts
 import { create } from "zustand";
 
 export interface User {
   id: string;
   name: string;
   email: string;
-  role: "customer" | "admin";
-  avatarUrl?: string;
+  role: "cliente" | "admin";
+  avatarUrl?: string; // URL opcional del avatar
 }
 
 interface AuthState {
@@ -33,14 +32,10 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   setToken: (token) => {
-    if (typeof window === "undefined") {
-      set({ token });
-      return;
-    }
-    if (token) {
-      localStorage.setItem("token", token);
-    } else {
-      localStorage.removeItem("token");
+    console.log("[authStore] setToken:", token);
+    if (typeof window !== "undefined") {
+      if (token) localStorage.setItem("token", token);
+      else localStorage.removeItem("token");
     }
     set({ token });
   },

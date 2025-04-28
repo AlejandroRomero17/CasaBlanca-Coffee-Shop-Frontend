@@ -11,8 +11,8 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
   FormControl,
+  FormMessage,
 } from "@/components/ui/form";
 import { login } from "@/services/authService";
 import { addToUserCart, getUserCart } from "@/services/cartService"; // 👈 añadimos getUserCart
@@ -24,15 +24,15 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
 
-const formSchema = z.object({
-  email: z.string().email({ message: "Ingresa un correo válido" }),
-  password: z.string().min(6, { message: "Mínimo 6 caracteres" }),
+const schema = z.object({
+  email: z.string().email("Ingresa un correo válido"),
+  password: z.string().min(6, "Mínimo 6 caracteres"),
 });
 type LoginValues = z.infer<typeof formSchema>;
 
 export default function LoginForm() {
-  useAuthRedirect();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -43,13 +43,14 @@ export default function LoginForm() {
   const { items: guestItems, clearCart, replaceItems } = useCartStore();
   const navigate = useNavigate();
 
-  const form = useForm<LoginValues>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<Inputs>({
+    resolver: zodResolver(schema),
+    defaultValues: { email: "", password: "" },
     mode: "onBlur",
     defaultValues: { email: "", password: "" },
   });
 
-  const onSubmit = async (values: LoginValues) => {
+  const onSubmit = async (vals: Inputs) => {
     setLoading(true);
     try {
       // 1) Login
@@ -110,53 +111,70 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen w-full bg-[#F8F2E3]">
-      <div className="w-full max-w-md space-y-8">
-        <div className="text-center">
-          <h1 className="text-3xl font-medium text-[#3B2F2F]">
-            Iniciar sesión
-          </h1>
-          <p className="mt-2 text-sm text-[#3B2F2F]">
-            Accede a tu cuenta para continuar
-          </p>
-        </div>
-
+    <div className="flex items-center justify-center min-h-screen bg-[#F8F2E3]">
+      <div className="w-full max-w-md p-8 bg-white rounded shadow">
+        <h2 className="mb-4 text-2xl font-semibold text-center">
+          Iniciar sesión
+        </h2>
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="p-8 mt-8 space-y-6 bg-white border border-[#D09E66] rounded-lg shadow-md"
-          >
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             {form.formState.errors.root && (
-              <div className="px-4 py-3 text-sm text-red-600 rounded-md bg-red-50">
+              <div className="p-2 text-sm text-red-700 bg-red-100 rounded">
                 {form.formState.errors.root.message}
               </div>
             )}
 
-            <div className="space-y-4">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field, fieldState }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium text-[#3B2F2F]">
-                      Correo electrónico
-                    </FormLabel>
-                    <FormControl>
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field, fieldState }) => (
+                <FormItem>
+                  <FormLabel>Correo electrónico</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      className={cn(fieldState.error && "border-red-500")}
+                      autoComplete="email"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field, fieldState }) => (
+                <FormItem>
+                  <FormLabel>Contraseña</FormLabel>
+                  <FormControl>
+                    <div className="relative">
                       <Input
-                        type="email"
+                        type={showPwd ? "text" : "password"}
                         {...field}
                         className={cn(
-                          "h-12 rounded-lg border-[#D09E66] focus:border-[#3B2F2F] focus:ring-1 focus:ring-[#D09E66]",
+                          "pr-10",
                           fieldState.error && "border-red-500"
                         )}
-                        autoComplete="email"
-                        aria-invalid={fieldState.invalid}
+                        autoComplete="current-password"
                       />
-                    </FormControl>
-                    <FormMessage className="text-xs text-red-600" />
-                  </FormItem>
-                )}
-              />
+                      <button
+                        type="button"
+                        onClick={() => setShowPwd(!showPwd)}
+                        className="absolute inset-y-0 flex items-center right-2"
+                        aria-label={
+                          showPwd ? "Ocultar contraseña" : "Mostrar contraseña"
+                        }
+                      >
+                        {showPwd ? <EyeOff /> : <Eye />}
+                      </button>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
               <FormField
                 control={form.control}

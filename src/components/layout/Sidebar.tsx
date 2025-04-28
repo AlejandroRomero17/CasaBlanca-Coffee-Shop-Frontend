@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@radix-ui/react-separator";
 import { X, ShoppingCart } from "lucide-react";
+import { useCart } from "@/context/CartContext";
 
 interface SidebarProps {
   open: boolean;
@@ -22,6 +23,7 @@ const navLinks = [
 ];
 
 export function Sidebar({ open, onClose }: SidebarProps) {
+  const { itemCount } = useCart();
   return (
     <AnimatePresence>
       {open && (
@@ -94,10 +96,15 @@ export function Sidebar({ open, onClose }: SidebarProps) {
             />
 
             <div className="mt-4">
-              <Link to="/cart" onClick={onClose}>
-                <Button variant="secondary" className="justify-start w-full">
+              <Link to="/cart" onClick={onClose} className="relative">
+                <Button variant="secondary" className="justify-start w-full relative">
                   <ShoppingCart className="w-5 h-5 mr-2" />
                   Carrito
+                  {itemCount > 0 && (
+                    <span className="absolute top-1 right-2 inline-flex items-center justify-center w-4 h-4 text-[10px] font-semibold text-white bg-[#D09E66] rounded-full">
+                      {itemCount}
+                    </span>
+                  )}
                 </Button>
               </Link>
             </div>

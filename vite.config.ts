@@ -82,6 +82,13 @@ export default defineConfig({
       'localhost',
       '127.0.0.1',
       '3da0-2806-105e-8-f5be-6107-d619-370-2e1e.ngrok-free.app'
-    ]
+    ],
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5050', 
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
 });

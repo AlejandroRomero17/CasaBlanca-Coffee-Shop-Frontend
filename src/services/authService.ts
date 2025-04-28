@@ -35,7 +35,20 @@ export async function register(payload: RegisterPayload) {
   return response.data;
 }
 
-export async function getProfile() {
-  const response = await API.get("/users/profile");
-  return response.data;
+export async function getProfile(): Promise<User> {
+  const { data } = await API.get("/users/profile");
+
+  console.log("[authService] getProfile raw data:", data);
+
+  const user: User = {
+    id: data.id,
+    name: data.name,
+    email: data.email,
+    role: data.role === "cliente" ? "customer" : data.role,
+    avatarUrl: undefined,
+  };
+
+  console.log("[authService] getProfile mapped user:", user);
+
+  return user;
 }

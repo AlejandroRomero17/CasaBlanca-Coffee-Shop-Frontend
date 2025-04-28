@@ -48,7 +48,6 @@ const CartSummary = ({ subtotal }: CartSummaryProps) => {
     }
 
     if (!stripe || !elements) return;
-
     setLoading(true);
 
     const { error } = await stripe.confirmPayment({

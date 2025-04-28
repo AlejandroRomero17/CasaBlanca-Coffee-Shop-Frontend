@@ -3,7 +3,7 @@ import { Navigate, Outlet } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
 import { Spinner } from "@/components/ui/spinner";
 
-const AdminRoute = () => {
+export default function AdminRoute() {
   const { token, user } = useAuthStore();
 
   // Mientras carga el usuario
@@ -27,6 +27,4 @@ const AdminRoute = () => {
 
   // ✅ Todo bien
   return <Outlet />;
-};
-
-export default AdminRoute;
+}

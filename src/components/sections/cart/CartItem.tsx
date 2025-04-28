@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Trash2 } from "lucide-react";
 import {
@@ -38,6 +38,12 @@ const CartItem = ({
   const [inputQty, setInputQty] = useState(quantity);
   const [dialogOpen, setDialogOpen] = useState(false);
 
+ 
+  useEffect(() => {
+    setInputQty(quantity);
+    setCustom(quantity > 6);
+  }, [quantity]);
+
   const onSelect = (val: string) => {
     if (val === "more") {
       setDialogOpen(true);
@@ -67,6 +73,11 @@ const CartItem = ({
     onQuantityChange(6);
     setInputQty(6);
   };
+
+  
+  useEffect(() => {
+    console.log("[DEBUG CartItem props]", { quantity, onRemove, onQuantityChange });
+  }, [quantity, onRemove, onQuantityChange]);
 
   return (
     <motion.li
