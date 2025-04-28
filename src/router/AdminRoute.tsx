@@ -1,3 +1,4 @@
+// src/router/AdminRoute.tsx
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
 import { Spinner } from "@/components/ui/spinner";
@@ -5,7 +6,7 @@ import { Spinner } from "@/components/ui/spinner";
 const AdminRoute = () => {
   const { token, user } = useAuthStore();
 
-  // Si hay token pero no user aún, mostrar loading temporal
+  // Mientras carga el usuario
   if (token && !user) {
     return (
       <div className="flex justify-center py-16">
@@ -14,11 +15,17 @@ const AdminRoute = () => {
     );
   }
 
-  // Si no está autenticado o no es admin, redirigir
-  if (!token || user?.role !== "admin") {
+  // 🚨 Si no hay token, redirigir a login
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // 🚨 Si no es admin, redirigir al inicio
+  if (user?.role !== "admin") {
     return <Navigate to="/" replace />;
   }
 
+  // ✅ Todo bien
   return <Outlet />;
 };
 

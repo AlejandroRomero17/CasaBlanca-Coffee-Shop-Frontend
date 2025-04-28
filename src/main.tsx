@@ -7,6 +7,7 @@ import { Elements } from "@stripe/react-stripe-js";
 import { stripePromise } from "@/lib/stripe";
 import "./index.css";
 import App from "./App.tsx";
+import { Toaster } from "sonner"; // ✅ Toast elegante
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -14,6 +15,15 @@ createRoot(document.getElementById("root")!).render(
       <BrowserRouter>
         <Elements stripe={stripePromise}>
           <App />
+          <Toaster
+            position="top-center" // 📍 centrado arriba
+            theme="light" // 🌓 claro (o puedes cambiar a "dark" si quieres)
+            richColors // 🎨 colores automáticos más vivos
+            duration={5000} // ⏳ 5 segundos de duración
+            visibleToasts={3} // 👀 máximo 3 visibles a la vez
+            expand // 🎯 efecto expandible para toasts largos
+            offset={16} // 📏 margen del top
+          />
         </Elements>
       </BrowserRouter>
     </HelmetProvider>

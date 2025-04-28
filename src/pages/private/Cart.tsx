@@ -15,7 +15,7 @@ const Cart = () => {
 
   // Debug: log items en esta página
   useEffect(() => {
-    console.log("📋 Items en Cart page:", items);
+    // console.log("📋 Items en Cart page:", items);
   }, [items]);
 
   const itemCount = items.reduce((sum, i) => sum + i.quantity, 0);
