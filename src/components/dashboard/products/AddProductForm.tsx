@@ -1,4 +1,3 @@
-// src/components/dashboard/products/AddProductForm.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -20,6 +19,14 @@ interface AddProductFormProps {
   onSubmit: (data: Partial<Product>) => void;
 }
 
+const CATEGORIAS: ProductCategory[] = [
+  "café",
+  "bebidas",
+  "postres",
+  "desayunos",
+  "almuerzos",
+];
+
 export default function AddProductForm({
   productToEdit,
   onClose,
@@ -38,29 +45,44 @@ export default function AddProductForm({
   useEffect(() => {
     if (productToEdit) {
       setForm({ ...productToEdit });
+      console.log("SET FORM CON:", productToEdit);
     }
   }, [productToEdit]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const { name, value } = e.target;
-    setForm((f) => ({
-      ...f,
-      [name]: name === "price" ? Number(value) : value,
-    }));
+    const { name, value, type } = e.target;
+    if (type === "checkbox") {
+      const checkbox = e.target as HTMLInputElement;
+      setForm((f) => ({ ...f, [name]: checkbox.checked }));
+    } else {
+      setForm((f) => ({
+        ...f,
+        [name]: name === "price" ? Number(value) : value,
+      }));
+    }
   };
 
-  const handleCategory = (value: ProductCategory) =>
-    setForm((f) => ({ ...f, category: value }));
+  const handleCategory = (value: string) => {
+    if (CATEGORIAS.includes(value as ProductCategory)) {
+      setForm((f) => ({ ...f, category: value as ProductCategory }));
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
     if (form.name && form.description && form.price !== undefined) {
-      onSubmit(form);
+      const cleanData = { ...form };
+      if (!productToEdit) {
+        delete cleanData.id;
+        delete cleanData.created_at;
+      }
+      onSubmit(cleanData);
       onClose();
     } else {
-      alert("Completa todos los campos");
+      alert("Completa todos los campos obligatorios.");
     }
   };
 
@@ -69,6 +91,29 @@ export default function AddProductForm({
       onSubmit={handleSubmit}
       className="p-6 space-y-4 text-black bg-white rounded-lg shadow-md"
     >
+      {productToEdit && (
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block mb-1 text-sm font-medium">ID</label>
+            <Input value={form.id} disabled className="bg-gray-100" />
+          </div>
+          <div>
+            <label className="block mb-1 text-sm font-medium">
+              Fecha de creación
+            </label>
+            <Input
+              value={
+                form.created_at
+                  ? new Date(form.created_at).toLocaleString()
+                  : ""
+              }
+              disabled
+              className="bg-gray-100"
+            />
+          </div>
+        </div>
+      )}
+
       <Input
         name="name"
         value={form.name ?? ""}
@@ -77,6 +122,7 @@ export default function AddProductForm({
         className="text-black placeholder:text-gray-500"
         required
       />
+
       <Textarea
         name="description"
         value={form.description ?? ""}
@@ -85,6 +131,7 @@ export default function AddProductForm({
         className="text-black placeholder:text-gray-500"
         required
       />
+
       <Input
         type="number"
         name="price"
@@ -95,22 +142,20 @@ export default function AddProductForm({
         required
       />
 
-      <Select value={form.category!} onValueChange={handleCategory}>
+      <Select value={form.category ?? "café"} onValueChange={handleCategory}>
         <SelectTrigger className="w-full text-black bg-white border border-gray-300">
-          <SelectValue placeholder="Categoría" />
+          <SelectValue placeholder="Selecciona categoría" />
         </SelectTrigger>
         <SelectContent className="text-black bg-white border border-gray-200 shadow-lg">
-          {["café", "bebidas", "postres", "desayunos", "almuerzos"].map(
-            (cat) => (
-              <SelectItem
-                key={cat}
-                value={cat}
-                className="text-black hover:bg-gray-100"
-              >
-                {cat}
-              </SelectItem>
-            )
-          )}
+          {CATEGORIAS.map((cat) => (
+            <SelectItem
+              key={cat}
+              value={cat}
+              className="text-black hover:bg-gray-100"
+            >
+              {cat}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
 
@@ -121,6 +166,27 @@ export default function AddProductForm({
         placeholder="URL de la imagen"
         className="text-black placeholder:text-gray-500"
       />
+
+      <div className="flex items-center pt-2 space-x-4">
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            name="available"
+            checked={form.available ?? true}
+            onChange={handleChange}
+          />
+          Disponible
+        </label>
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            name="featured"
+            checked={form.featured ?? false}
+            onChange={handleChange}
+          />
+          Destacado
+        </label>
+      </div>
 
       <div className="flex justify-end pt-4 space-x-2">
         <Button

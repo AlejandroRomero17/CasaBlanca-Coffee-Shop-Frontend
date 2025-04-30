@@ -24,6 +24,7 @@ export const useProductStore = create<ProductState>((set) => ({
   products: [],
   loading: false,
   error: null,
+
   fetchProducts: async () => {
     set({ loading: true, error: null });
     try {
@@ -35,16 +36,18 @@ export const useProductStore = create<ProductState>((set) => ({
       set({ loading: false });
     }
   },
+
   addProduct: async (product: Partial<Product>) => {
     try {
-      await createProduct(product);
-      await set((state) => ({
-        products: [...state.products, product as Product],
+      const newProduct = await createProduct(product); // ahora usamos el que devuelve el backend
+      set((state) => ({
+        products: [...state.products, newProduct],
       }));
     } catch (error) {
       set({ error: (error as Error).message });
     }
   },
+
   editProduct: async (id: string, data: Partial<Product>) => {
     try {
       const updatedProduct = await updateProduct(id, data);
@@ -57,6 +60,7 @@ export const useProductStore = create<ProductState>((set) => ({
       set({ error: (error as Error).message });
     }
   },
+
   removeProduct: async (id: string) => {
     try {
       await deleteProduct(id);

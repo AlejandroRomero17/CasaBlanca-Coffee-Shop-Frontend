@@ -3,8 +3,9 @@ import { Helmet } from "react-helmet-async";
 import LoungeHero from "@/components/sections/lounge/LoungeHero";
 import LoungeInfo from "@/components/sections/lounge/LoungeInfo";
 import LoungeFeatures from "@/components/sections/lounge/LoungeFeatures";
-// import LoungeMenuPreview from "@/components/sections/lounge/LoungeMenuPreview";
+// import LoungeReservation from "@/components/sections/lounge/LoungeReservation"; // ← Importa el index
 import LoungeReservation from "@/components/sections/lounge/LoungeReservation";
+// import LoungeReservation from "@/components/sections/lounge/LoungeReservation/index"
 
 const Lounge = () => {
   return (
@@ -31,12 +32,10 @@ const Lounge = () => {
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://casablanca.coffee/lounge" />
       </Helmet>
-
       <LoungeHero />
       <LoungeInfo />
       <LoungeFeatures />
-      {/* <LoungeMenuPreview /> */}
-      <LoungeReservation />
+      <LoungeReservation /> {/* ← Aquí */}
     </>
   );
 };
