@@ -19,6 +19,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/store/authStore";
+import { useCartStore } from "@/store/cartStore";
 
 interface CartSummaryProps {
   subtotal: number;
@@ -28,7 +29,8 @@ const CartSummary = ({ subtotal }: CartSummaryProps) => {
   const stripe = useStripe();
   const elements = useElements();
   const navigate = useNavigate();
-  const { token } = useAuthStore();
+  const { token, user } = useAuthStore();
+  const { items, clearCart } = useCartStore();
 
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -51,7 +53,7 @@ const CartSummary = ({ subtotal }: CartSummaryProps) => {
 
     setLoading(true);
 
-    const { error } = await stripe.confirmPayment({
+    const result = await stripe.confirmPayment({
       elements,
       confirmParams: {
         return_url: window.location.href,
@@ -59,21 +61,64 @@ const CartSummary = ({ subtotal }: CartSummaryProps) => {
       redirect: "if_required",
     });
 
-    if (error) {
-      setErrorMsg(error.message ?? "Algo salió mal.");
+    if (result.error) {
+      console.error("STRIPE ERROR:", result.error);
+      setErrorMsg(result.error.message ?? "Algo salió mal.");
       toast.error("Error procesando el pago", {
-        description: error.message ?? "Intenta de nuevo más tarde.",
+        description: result.error.message ?? "Intenta de nuevo más tarde.",
         duration: 6000,
       });
-    } else {
-      setSuccess(true);
-      toast.success("Pago completado con éxito 🎉", {
-        description: "Estamos confirmando tu orden...",
-        duration: 6000,
-      });
+      setLoading(false);
+      return;
     }
 
-    setLoading(false);
+    const paymentIntent = result.paymentIntent;
+    if (!paymentIntent) {
+      toast.error("No se recibió el PaymentIntent.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/stripe/checkout`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            cart: items.map((item) => ({
+              product_id: item.id,
+              quantity: item.quantity,
+              price: item.price,
+            })),
+            shippingAddress: "No proporcionado",
+            paymentMethod: paymentIntent.payment_method_types?.[0] ?? "card",
+            stripePaymentId: paymentIntent.id,
+            amount: paymentIntent.amount,
+            currency: paymentIntent.currency,
+            receiptUrl: "", // Este campo solo lo da Stripe en el webhook
+            stripeEventData: paymentIntent,
+          }),
+        }
+      );
+
+      if (!response.ok) throw new Error("Error al registrar la orden");
+
+      toast.success("Pago completado y orden registrada 🎉", {
+        duration: 6000,
+      });
+      setSuccess(true);
+      clearCart();
+      navigate("/profile");
+    } catch (err) {
+      console.error("Error registrando orden:", err);
+      toast.error("Pago procesado, pero hubo un error al registrar la orden.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

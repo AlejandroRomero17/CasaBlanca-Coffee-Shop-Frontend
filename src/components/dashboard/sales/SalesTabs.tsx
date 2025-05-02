@@ -72,8 +72,8 @@ const SalesTabs = () => {
             Por Hora
           </TabsTrigger>
         </TabsList>
-        <Select defaultValue="year" className="text-[#4A4A4A]">
-          <SelectTrigger className="w-[180px]">
+        <Select defaultValue="year">
+          <SelectTrigger className="w-[180px] text-[#4A4A4A]">
             <SelectValue placeholder="Seleccionar período" />
           </SelectTrigger>
           <SelectContent>

@@ -36,7 +36,7 @@ export default function AddProductForm({
     name: "",
     description: "",
     price: 0,
-    category: "café",
+    category: undefined, // ← Para que salga el placeholder
     image: "",
     available: true,
     featured: false,
@@ -73,7 +73,12 @@ export default function AddProductForm({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (form.name && form.description && form.price !== undefined) {
+    if (
+      form.name &&
+      form.description &&
+      form.price !== undefined &&
+      form.category
+    ) {
       const cleanData = { ...form };
       if (!productToEdit) {
         delete cleanData.id;
@@ -142,7 +147,7 @@ export default function AddProductForm({
         required
       />
 
-      <Select value={form.category ?? "café"} onValueChange={handleCategory}>
+      <Select value={form.category ?? ""} onValueChange={handleCategory}>
         <SelectTrigger className="w-full text-black bg-white border border-gray-300">
           <SelectValue placeholder="Selecciona categoría" />
         </SelectTrigger>

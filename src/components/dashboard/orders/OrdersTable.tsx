@@ -1,5 +1,3 @@
-// components/OrdersTable.tsx
-// components/OrdersTable.tsx
 import { useEffect, useState } from "react";
 import {
   Check,
@@ -9,6 +7,8 @@ import {
   Search,
   ShoppingBag,
   X,
+  MapPin,
+  CreditCard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -67,16 +67,10 @@ const OrdersTable = () => {
           map[product.id] = product;
         });
 
-        const normalizedOrders: Order[] = ordersData.map((order: any) => ({
+        // Asegurar que cada orden tenga un array de items
+        const normalizedOrders = ordersData.map((order) => ({
           ...order,
-          _id: order._id ?? order.id,
-          items: (order.items ?? []).map(
-            (id: string): OrderItem => ({
-              product: id,
-              quantity: 1,
-              price: map[id]?.price ?? 0,
-            })
-          ),
+          items: Array.isArray(order.items) ? order.items : [],
         }));
 
         setProductsMap(map);
@@ -161,6 +155,8 @@ const OrdersTable = () => {
                 <TableHead>Cliente</TableHead>
                 <TableHead>Items</TableHead>
                 <TableHead>Total</TableHead>
+                <TableHead>Pago</TableHead>
+                <TableHead>Dirección</TableHead>
                 <TableHead>Estado</TableHead>
                 <TableHead className="text-right">Acciones</TableHead>
               </TableRow>
@@ -174,17 +170,28 @@ const OrdersTable = () => {
                   <TableCell>{order.isDelivery ? "Envío" : "Mesa"}</TableCell>
                   <TableCell>
                     <div className="flex flex-col">
-                      {order.items.map((item, index) => {
-                        const product = productsMap[item.product as string];
-                        return (
-                          <span key={index} className="text-sm">
-                            {item.quantity}x {product?.name ?? "Producto"}
-                          </span>
-                        );
-                      })}
+                      {Array.isArray(order.items) &&
+                        order.items.map((item, index) => {
+                          const product = productsMap[item.product as string];
+                          return (
+                            <span key={index} className="text-sm">
+                              {item.quantity}x {product?.name ?? "Producto"}
+                            </span>
+                          );
+                        })}
                     </div>
                   </TableCell>
                   <TableCell>${order.total.toFixed(2)}</TableCell>
+                  <TableCell className="flex items-center gap-1">
+                    <CreditCard className="w-4 h-4" />
+                    {order.paymentMethod}
+                  </TableCell>
+                  <TableCell className="text-sm">
+                    <div className="flex items-start gap-1">
+                      <MapPin className="w-4 h-4 mt-0.5" />
+                      <span>{order.shipping_address ?? "-"}</span>
+                    </div>
+                  </TableCell>
                   <TableCell>
                     <Badge
                       variant={
@@ -218,7 +225,7 @@ const OrdersTable = () => {
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
+                        <Button variant="outline" size="icon">
                           <MoreHorizontal className="w-4 h-4" />
                           <span className="sr-only">Abrir menú</span>
                         </Button>

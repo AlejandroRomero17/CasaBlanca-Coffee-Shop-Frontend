@@ -27,7 +27,6 @@ export async function getOrderById(id: string): Promise<Order> {
   return response.data;
 }
 
-
 /**
  * 👤 Obtiene las órdenes del usuario (versión simplificada para perfil)
  */
@@ -41,7 +40,7 @@ export async function getProfileOrders(): Promise<ProfileOrder[]> {
     paymentMethod: order.paymentMethod,
     payment_method: order.paymentMethod, // Alias
     createdAt: order.createdAt,
-    created_at: order.createdAt // Alias
+    created_at: order.createdAt, // Alias
   }));
 }
 

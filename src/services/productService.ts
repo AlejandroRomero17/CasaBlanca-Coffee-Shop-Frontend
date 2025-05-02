@@ -1,62 +1,47 @@
-import { API_BASE_URL } from "@/config/api";
+import API from "@/services/api";
 import { Product } from "@/types/product";
-import { useAuthStore } from "@/store/authStore"; // Asegúrate de importar el store de auth
+import { useAuthStore } from "@/store/authStore";
 
-// Wrapper que maneja errores de red y parsea JSON
-async function request<T>(url: string, options?: RequestInit): Promise<T> {
-  const token = useAuthStore.getState().token; // Obtener el token desde el authStore
-  // console.log("Token en la petición:", token); // Verificamos que el token esté presente
-
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-  };
-
+/**
+ * Interceptor manual opcional (para funciones fuera de componentes React).
+ * Aunque ya se aplica uno global en `services/api.ts`, esto asegura el token
+ * también si se consume fuera del flujo normal de React.
+ */
+const withAuth = () => {
+  const token = useAuthStore.getState().token;
   if (token) {
-    headers["Authorization"] = `Bearer ${token}`; // Incluir el token en la cabecera
+    API.defaults.headers.common["Authorization"] = `Bearer ${token}`;
   }
+};
 
-  const res = await fetch(url, {
-    ...options,
-    headers: {
-      ...headers,
-      ...(options?.headers || {}),
-    },
-  });
+// GET /products
+export const fetchProducts = async (): Promise<Product[]> => {
+  withAuth();
+  const res = await API.get<Product[]>("/products");
+  return res.data;
+};
 
-  if (!res.ok) {
-    let msg: string;
-    try {
-      msg = await res.text();
-    } catch {
-      msg = `Request failed (${res.status})`;
-    }
-    throw new Error(msg);
-  }
-  return res.json() as Promise<T>;
-}
+// POST /products
+export const createProduct = async (
+  data: Partial<Product>
+): Promise<Product> => {
+  withAuth();
+  const res = await API.post<Product>("/products", data);
+  return res.data;
+};
 
-// CRUD Products
-export function fetchProducts(): Promise<Product[]> {
-  return request<Product[]>(`${API_BASE_URL}/products`);
-}
-
-export function createProduct(data: Partial<Product>): Promise<Product> {
-  return request<Product>(`${API_BASE_URL}/products`, {
-    method: "POST",
-    body: JSON.stringify(data),
-  });
-}
-
-export function updateProduct(
+// PUT /products/:id
+export const updateProduct = async (
   id: string,
   data: Partial<Product>
-): Promise<Product> {
-  return request<Product>(`${API_BASE_URL}/products/${id}`, {
-    method: "PUT",
-    body: JSON.stringify(data),
-  });
-}
+): Promise<Product> => {
+  withAuth();
+  const res = await API.put<Product>(`/products/${id}`, data);
+  return res.data;
+};
 
-export async function deleteProduct(id: string): Promise<void> {
-  await request(`${API_BASE_URL}/products/${id}`, { method: "DELETE" });
-}
+// DELETE /products/:id
+export const deleteProduct = async (id: string): Promise<void> => {
+  withAuth();
+  await API.delete(`/products/${id}`);
+};

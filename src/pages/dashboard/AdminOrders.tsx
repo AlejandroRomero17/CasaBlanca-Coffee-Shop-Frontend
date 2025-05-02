@@ -1,4 +1,3 @@
-// import OrdersTable from "@/components/dashboard/orders/OrdersTable";
 import OrdersTable from "@/components/dashboard/orders/OrdersTable";
 
 const AdminOrders = () => {
