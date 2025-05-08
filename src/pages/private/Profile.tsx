@@ -1,4 +1,3 @@
-// src/pages/Profile.tsx
 import { useEffect, useState } from "react";
 import { getProfile } from "@/services/authService";
 import { getProfileOrders } from "@/services/orderService";
@@ -6,6 +5,18 @@ import { useAuthStore } from "@/store/authStore";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { ProfileOrder } from "@/types/order";
+import { formatPrice } from "@/utils/formatPrice";
+import { formatDateForUser } from "@/utils/formatDate";
+
+function translatePaymentMethod(method: string): string {
+  const translations: Record<string, string> = {
+    card: "Tarjeta",
+    efectivo: "Efectivo",
+    transferencia: "Transferencia",
+    // puedes agregar más en el futuro
+  };
+  return translations[method] || "Desconocido";
+}
 
 export default function ProfilePage() {
   const { user, setUser, logout } = useAuthStore();
@@ -44,9 +55,6 @@ export default function ProfilePage() {
   }
 
   return (
-    // 1. pt-20: espacio para el Navbar (ajusta según la altura real)
-    // 2. px-4: padding lateral responsivo
-    // 3. pb-16: espacio para el Footer
     <div className="flex justify-center px-4 pt-20 pb-16">
       <div className="w-full max-w-lg p-6 bg-white shadow-lg rounded-2xl">
         <h1 className="text-3xl font-semibold text-center text-[#3B2F2F] mb-6">
@@ -97,14 +105,18 @@ export default function ProfilePage() {
                 >
                   <p className="font-medium text-[#3B2F2F]">
                     Total:{" "}
-                    <span className="text-lg">${order.total.toFixed(2)}</span>
+                    <span className="text-lg">
+                      {formatPrice(order.total / 100)}
+                    </span>
                   </p>
                   <p className="text-[#3B2F2F]/80">Estado: {order.status}</p>
                   <p className="text-[#3B2F2F]/80">
-                    Pago: {order.payment_method}
+                    Pago: {translatePaymentMethod(order.payment_method)}
                   </p>
                   <p className="mt-2 text-sm text-[#3B2F2F]/60">
-                    {new Date(order.created_at).toLocaleString()}
+                    {order.created_at
+                      ? formatDateForUser(order.created_at)
+                      : "Fecha no disponible"}
                   </p>
                 </li>
               ))}

@@ -8,7 +8,7 @@ import Contact from "@/pages/public/Contact";
 import Blog from "@/pages/public/Blog";
 import Article from "@/pages/public/Article";
 import Subscription from "@/pages/public/Subscription";
-import Cart from "@/pages/private/Cart"; // 👈 importa el Cart aquí (aunque esté en /private/Cart)
+import Cart from "@/pages/private/Cart";
 
 export const publicRoutes = (
   <Route element={<PublicLayout />}>

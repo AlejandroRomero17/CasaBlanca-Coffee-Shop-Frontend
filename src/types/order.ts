@@ -20,12 +20,13 @@ export interface Order {
   paymentMethod: "efectivo" | "tarjeta" | "transferencia";
   tableNumber?: number;
   isDelivery: boolean;
-  deliveryAddress?: {
-    street?: string;
-    city?: string;
-    zipCode?: string;
-    details?: string;
-  };
+  shipping_address?: string;
+  // deliveryAddress?: {
+  //   street?: string;
+  //   city?: string;
+  //   zipCode?: string;
+  //   details?: string;
+  // };
   createdAt: string;
   updatedAt: string;
 }

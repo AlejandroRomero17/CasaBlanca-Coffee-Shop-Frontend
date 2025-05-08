@@ -45,7 +45,7 @@ import {
 } from "@/components/ui/select";
 import { getAllOrders, updateOrderStatus } from "@/services/orderService";
 import { fetchProducts } from "@/services/productService";
-import { Order, OrderItem } from "@/types/order";
+import { Order } from "@/types/order";
 import { Product } from "@/types/product";
 
 const OrdersTable = () => {

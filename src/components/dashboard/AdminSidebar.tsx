@@ -1,5 +1,3 @@
-// src/components/layout/AdminSidebar.tsx
-
 import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useSidebarStore } from "@/store/sidebarStore";
@@ -10,6 +8,7 @@ import {
   Package,
   DollarSign,
   ShoppingBag,
+  Users,
   X,
 } from "lucide-react";
 
@@ -18,6 +17,7 @@ const mainLinks = [
   { name: "Productos", href: "/dashboard/products", icon: Package },
   { name: "Ventas", href: "/dashboard/sales", icon: DollarSign },
   { name: "Pedidos", href: "/dashboard/orders", icon: ShoppingBag },
+  { name: "Usuarios", href: "/dashboard/users", icon: Users }, // ✅ Nuevo enlace agregado
 ];
 
 export default function AdminSidebar() {
@@ -61,7 +61,7 @@ export default function AdminSidebar() {
             <NavLink
               key={href}
               to={href}
-              end={href === "/dashboard"} // solo match exact en "Resumen"
+              end={href === "/dashboard"}
               className={({ isActive }) =>
                 cn(
                   "relative flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",

@@ -29,7 +29,7 @@ const ProductCard = ({ product, index, onClick }: Props) => {
     const payload = {
       product_id: product.id,
       product_name: product.name,
-      product_image: product.image,
+      product_image: product.image || "/placeholder.webp", // ✅ fallback
       product_price: Number(product.price),
       quantity: 1,
     };
@@ -45,10 +45,12 @@ const ProductCard = ({ product, index, onClick }: Props) => {
       addToCartState({
         id: product.id,
         name: product.name,
-        image: product.image,
+        image: product.image || "/placeholder.webp", // ✅ fallback consistente
         price: Number(product.price),
         quantity: 1,
       });
+
+      console.log("✅ Imagen enviada al carrito:", product.image);
 
       setIsAdded(true);
       setTimeout(() => setIsAdded(false), 2000);
@@ -74,7 +76,7 @@ const ProductCard = ({ product, index, onClick }: Props) => {
       <div className="h-full overflow-hidden rounded-lg border border-[#f0e6db] bg-white transition-all duration-300 ease-out group-hover:shadow-lg group-hover:ring-1 group-hover:ring-[#e9d4ba]/50">
         <div className="relative overflow-hidden aspect-[4/3]">
           <motion.img
-            src={product.image}
+            src={product.image || "/placeholder.webp"} // ✅ seguridad visual
             alt={product.name}
             className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
             loading="lazy"
@@ -102,7 +104,7 @@ const ProductCard = ({ product, index, onClick }: Props) => {
             <Button
               size="sm"
               onClick={(e) => {
-                e.stopPropagation(); // prevenir que se abra la modal
+                e.stopPropagation();
                 handleAddToCart();
               }}
               className={clsx(

@@ -27,6 +27,7 @@ const navLinks = [
 
 interface NavbarProps {
   onMenuClick: () => void;
+  isMenuOpen: boolean;
 }
 
 export function Navbar({ onMenuClick }: NavbarProps) {
