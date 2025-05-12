@@ -21,6 +21,8 @@ export interface User {
   name: string;
   email: string;
   role: "customer" | "admin";
+  /** Número de teléfono del usuario (opcional) */
+  phone?: string;
   /** URL de la foto de perfil (opcional) */
   avatarUrl?: string;
   createdAt?: string;

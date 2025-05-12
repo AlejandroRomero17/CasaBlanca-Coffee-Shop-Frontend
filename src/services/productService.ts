@@ -21,6 +21,11 @@ export const fetchProducts = async (): Promise<Product[]> => {
   return res.data;
 };
 
+export async function getProductById(id: string): Promise<Product> {
+  const res = await API.get(`/products/${id}`);
+  return res.data;
+}
+
 // POST /products
 export const createProduct = async (
   data: Partial<Product>

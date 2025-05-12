@@ -8,6 +8,7 @@ import clsx from "clsx";
 import { useCartStore } from "@/store/cartStore";
 import { isAuthenticated, getUserId } from "@/utils/session";
 import { addToTempCart, addToUserCart } from "@/services/cartService";
+import { formatPrice } from "@/utils/formatPrice";
 
 interface Props {
   product: Product;
@@ -99,7 +100,7 @@ const ProductCard = ({ product, index, onClick }: Props) => {
           </p>
           <div className="flex items-center justify-between mt-3">
             <span className="text-base font-bold text-[#3B2F2F]">
-              ${product.price.toFixed(2)}
+              {formatPrice(product.price)}
             </span>
             <Button
               size="sm"

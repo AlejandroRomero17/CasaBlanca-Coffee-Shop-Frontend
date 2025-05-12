@@ -6,6 +6,7 @@ export interface User {
   name: string;
   email: string;
   role: "customer" | "admin";
+  phone?: string; // Añadir esta línea
   avatarUrl?: string;
 }
 

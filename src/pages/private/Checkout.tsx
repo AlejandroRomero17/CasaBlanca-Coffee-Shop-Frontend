@@ -15,20 +15,38 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import CheckoutProductItem from "@/components/sections/checkout/CheckoutProductItem";
 
+// Función de ayuda para convertir a centavos
+const toCents = (price: number): number => {
+  // Si el precio es mayor a 1000, asumir que ya está en centavos
+  if (price > 1000) return Math.round(price);
+  return Math.round(price * 100);
+};
+
 export default function Checkout() {
   const { items, selectedItems } = useCartStore();
   const { user, token } = useAuthStore();
 
   const selectedProducts = items.filter((item) => selectedItems.has(item.id));
+
+  // CALCULO CORREGIDO DEL SUBTOTAL EN CENTAVOS
   const subtotal = selectedProducts.reduce(
-    (sum, i) => sum + i.quantity * i.price,
+    (sum, item) => sum + item.quantity * toCents(item.price),
     0
   );
+
+  console.log('[Checkout] Subtotal calculado:', {
+    subtotal,
+    items: selectedProducts.map(item => ({
+      id: item.id,
+      price: item.price,
+      priceInCents: toCents(item.price),
+      quantity: item.quantity
+    }))
+  });
 
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loadingIntent, setLoadingIntent] = useState(true);
   const [errorIntent, setErrorIntent] = useState<string | null>(null);
-
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
   const [loadingAddresses, setLoadingAddresses] = useState(true);
@@ -59,6 +77,9 @@ export default function Checkout() {
       try {
         setLoadingIntent(true);
         setErrorIntent(null);
+
+        console.log('[Checkout] Creando PaymentIntent con amount:', subtotal);
+
         const res = await fetch(
           `${import.meta.env.VITE_API_URL}/stripe/create-payment-intent`,
           {
@@ -69,12 +90,19 @@ export default function Checkout() {
             },
             body: JSON.stringify({
               user_id: user.id,
-              amount: Math.round(subtotal * 100),
+              amount: subtotal, // Ya está en centavos
             }),
           }
         );
-        const { client_secret } = await res.json();
-        setClientSecret(client_secret);
+
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+
+        const data = await res.json();
+        console.log('[Checkout] Respuesta de create-payment-intent:', data);
+
+        setClientSecret(data.client_secret);
       } catch (err) {
         console.error("Error creando paymentIntent", err);
         setErrorIntent(

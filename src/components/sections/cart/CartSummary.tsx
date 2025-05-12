@@ -51,19 +51,20 @@ const CartSummary = ({ shippingAddress, disabled }: CartSummaryProps) => {
     setErrorMsg(null);
 
     if (!token) {
-      toast.error("Debes iniciar sesión para poder pagar.", {
-        description: "Te llevaremos a la página de inicio de sesión.",
-      });
+      toast.error("Debes iniciar sesión para poder pagar.");
       return;
     }
 
     if (!shippingAddress) {
-      setErrorMsg("Selecciona una dirección de envío antes de pagar.");
       toast.error("Selecciona una dirección de envío antes de pagar.");
       return;
     }
 
-    if (!stripe || !elements) return;
+    if (!stripe || !elements) {
+      toast.error("El sistema de pago no está disponible.");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -75,16 +76,37 @@ const CartSummary = ({ shippingAddress, disabled }: CartSummaryProps) => {
 
       if (result.error) throw result.error;
 
-      const pi = result.paymentIntent;
-      if (!pi) throw new Error("No se recibió el PaymentIntent.");
+      const paymentIntent = result.paymentIntent;
+      if (!paymentIntent) throw new Error("No se recibió el PaymentIntent.");
 
-      const shippingStr = `${shippingAddress.address_line1}${
-        shippingAddress.address_line2
-          ? `, ${shippingAddress.address_line2}`
-          : ""
-      }, ${shippingAddress.city}, ${shippingAddress.state}, ${
-        shippingAddress.postal_code
-      }, ${shippingAddress.country}`;
+      // Estructura de datos consistente
+      const requestData = {
+        payment_data: {
+          stripe_payment_id: paymentIntent.id,
+          amount: getSubtotal(), // Usar el subtotal directamente (ya en centavos)
+          currency: paymentIntent.currency,
+          payment_method: paymentIntent.payment_method_types?.[0] || "card",
+          status: "succeeded",
+        },
+        order_data: {
+          items: selectedProducts.map((item) => ({
+            product_id: item.id,
+            quantity: item.quantity,
+            unit_price: item.price, // Usar el precio directamente (ya en centavos)
+          })),
+          shipping_address: {
+            line1: shippingAddress.address_line1,
+            line2: shippingAddress.address_line2 || "",
+            city: shippingAddress.city,
+            state: shippingAddress.state,
+            postal_code: shippingAddress.postal_code,
+            country: shippingAddress.country,
+          },
+          subtotal: getSubtotal(), // Usar el mismo monto en centavos
+        },
+      };
+
+      console.log("Enviando datos al backend:", requestData);
 
       const resp = await fetch(
         `${import.meta.env.VITE_API_URL}/stripe/checkout`,
@@ -94,41 +116,36 @@ const CartSummary = ({ shippingAddress, disabled }: CartSummaryProps) => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({
-            cart: selectedProducts.map((i) => ({
-              product_id: i.id,
-              quantity: i.quantity,
-              price: i.price,
-            })),
-            shippingAddress: shippingStr,
-            paymentMethod: pi.payment_method_types?.[0] ?? "tarjeta",
-            stripePaymentId: pi.id,
-            amount: pi.amount,
-            currency: pi.currency,
-            receiptUrl: "",
-            stripeEventData: pi,
-          }),
+          body: JSON.stringify(requestData),
         }
       );
 
-      if (!resp.ok) throw new Error("Error al registrar la orden");
+      if (!resp.ok) {
+        const errorData = await resp.json();
+        console.error("Error del backend:", errorData);
+        throw new Error(errorData.error || "Error al registrar la orden");
+      }
+
+      const responseData = await resp.json();
+      console.log("Respuesta del backend:", responseData);
+
+      if (!responseData.success) {
+        throw new Error("La respuesta del servidor no indica éxito");
+      }
 
       toast.success("Pago completado y orden registrada 🎉");
       setSuccess(true);
       clearCart();
     } catch (error) {
-      console.error(error);
+      console.error("Error en el pago:", error);
       const message =
-        error instanceof Error ? error.message : "Ocurrió un error inesperado";
+        error instanceof Error ? error.message : "Error desconocido";
       setErrorMsg(message);
-      toast.error("Error en el pago", {
-        description: message,
-      });
+      toast.error("Error en el pago", { description: message });
     } finally {
       setLoading(false);
     }
   };
-
   return (
     <Card className="bg-white">
       <form onSubmit={handleSubmit}>

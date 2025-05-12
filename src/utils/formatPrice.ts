@@ -1,22 +1,8 @@
-// src/utils/formatPrice.ts
-
-/**
- * Formats a number into a currency string.
- *
- * @param value   The numeric amount to format.
- * @param locale  BCP 47 language tag, defaults to "es-MX".
- * @param currency  ISO 4217 currency code, defaults to "MXN".
- * @returns A localized currency string, e.g. "$1,234.00".
- */
-export function formatPrice(
-  value: number,
-  locale: string = "es-MX",
-  currency: string = "MXN"
-): string {
-  return new Intl.NumberFormat(locale, {
+export const formatPrice = (priceInCents: number) => {
+  // priceInCents: 7000 = $70.00
+  const amountInPesos = priceInCents / 100;
+  return new Intl.NumberFormat("es-MX", {
     style: "currency",
-    currency,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value);
-}
+    currency: "MXN",
+  }).format(amountInPesos);
+};
