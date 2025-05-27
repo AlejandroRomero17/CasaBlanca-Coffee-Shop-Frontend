@@ -82,6 +82,14 @@ export default defineConfig({
       'localhost',
       '127.0.0.1',
       '3da0-2806-105e-8-f5be-6107-d619-370-2e1e.ngrok-free.app'
-    ]
+    ],
+    proxy: {
+      '/api': {
+        target: 'https://web-production-ff9a.up.railway.app',
+        changeOrigin: true,
+        secure: true,
+        rewrite: (path) => path.replace(/^\/api/, '/api')
+      }
+    }
   },
 });
