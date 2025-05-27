@@ -1,8 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/utils/formatPrice";
 import { formatDateForUser } from "@/utils/formatDate";
 import { ProfileOrder } from "@/types/order";
+import { Download, FileText, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { useAuthStore } from "@/store/authStore";
+import { useState } from "react";
 
 interface OrderCardProps {
   order: ProfileOrder;
@@ -27,6 +32,10 @@ const formatAddress = (addressString: string) => {
 };
 
 export function OrderCard({ order }: OrderCardProps) {
+  const { token } = useAuthStore();
+  const [isLoadingTicket, setIsLoadingTicket] = useState(false);
+  const [isLoadingInvoice, setIsLoadingInvoice] = useState(false);
+  
   // Debug: verifica los valores de precios
   console.log("Order data:", {
     orderTotal: order.total,
@@ -46,6 +55,96 @@ export function OrderCard({ order }: OrderCardProps) {
 
   // Usamos el total de la orden o el calculado si no está disponible
   const displayTotal = order.total ?? calculatedTotal;
+  
+  // Función para descargar el ticket
+  const downloadTicket = async () => {
+    try {
+      setIsLoadingTicket(true);
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/tickets/${order.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      
+      if (!response.ok) {
+        throw new Error(`Error al descargar el ticket: ${response.statusText}`);
+      }
+      
+      // Obtener el blob del PDF
+      const blob = await response.blob();
+      
+      // Crear una URL para el blob
+      const url = window.URL.createObjectURL(blob);
+      
+      // Crear un enlace temporal
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ticket-orden-${order.id}.pdf`;
+      
+      // Simular un clic en el enlace
+      document.body.appendChild(a);
+      a.click();
+      
+      // Limpiar
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      toast.success("Ticket descargado correctamente");
+    } catch (error) {
+      console.error("Error al descargar el ticket:", error);
+      toast.error(error instanceof Error ? error.message : "Error al descargar el ticket");
+    } finally {
+      setIsLoadingTicket(false);
+    }
+  };
+  
+  // Función para descargar la factura
+  const downloadInvoice = async () => {
+    try {
+      setIsLoadingInvoice(true);
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/invoices/${order.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      
+      if (!response.ok) {
+        throw new Error(`Error al descargar la factura: ${response.statusText}`);
+      }
+      
+      // Obtener el blob del PDF
+      const blob = await response.blob();
+      
+      // Crear una URL para el blob
+      const url = window.URL.createObjectURL(blob);
+      
+      // Crear un enlace temporal
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `factura-${order.id}.pdf`;
+      
+      // Simular un clic en el enlace
+      document.body.appendChild(a);
+      a.click();
+      
+      // Limpiar
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      toast.success("Factura descargada correctamente");
+    } catch (error) {
+      console.error("Error al descargar la factura:", error);
+      toast.error(error instanceof Error ? error.message : "Error al descargar la factura");
+    } finally {
+      setIsLoadingInvoice(false);
+    }
+  };
 
   return (
     <Card className="w-full max-w-3xl mx-auto mb-6 shadow-md">
@@ -126,6 +225,46 @@ export function OrderCard({ order }: OrderCardProps) {
           <p className="text-gray-500">No hay productos en esta orden</p>
         )}
       </CardContent>
+      <div className="px-6 pb-4 flex flex-wrap gap-3 justify-end">
+        <Button 
+          onClick={downloadTicket} 
+          variant={isLoadingTicket ? "default" : "outline"}
+          size="sm" 
+          className={`flex items-center gap-2 ${isLoadingTicket ? "bg-green-600 hover:bg-green-700 text-white" : ""}`}
+          disabled={isLoadingTicket}
+        >
+          {isLoadingTicket ? (
+            <>
+              <Loader2 size={16} className="animate-spin text-white" />
+              Descargando...
+            </>
+          ) : (
+            <>
+              <Download size={16} />
+              Ticket
+            </>
+          )}
+        </Button>
+        <Button 
+          onClick={downloadInvoice} 
+          variant={isLoadingInvoice ? "default" : "outline"}
+          size="sm" 
+          className={`flex items-center gap-2 ${isLoadingInvoice ? "bg-green-600 hover:bg-green-700 text-white" : ""}`}
+          disabled={isLoadingInvoice}
+        >
+          {isLoadingInvoice ? (
+            <>
+              <Loader2 size={16} className="animate-spin text-white" />
+              Descargando...
+            </>
+          ) : (
+            <>
+              <FileText size={16} />
+              Factura
+            </>
+          )}
+        </Button>
+      </div>
     </Card>
   );
 }
