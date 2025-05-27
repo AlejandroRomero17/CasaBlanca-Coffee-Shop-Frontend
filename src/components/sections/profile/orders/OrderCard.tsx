@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/utils/formatPrice";
 import { formatDateForUser } from "@/utils/formatDate";
 import { ProfileOrder } from "@/types/order";
-import { Download, FileText, Loader2 } from "lucide-react";
+import { Download, FileText, Loader2, Mail, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useAuthStore } from "@/store/authStore";
 import { useState } from "react";
+import { cancelOrder, sendInvoiceByEmail } from "@/services/orderService";
 
 interface OrderCardProps {
   order: ProfileOrder;
@@ -32,12 +33,17 @@ const formatAddress = (addressString: string) => {
 };
 
 export function OrderCard({ order }: OrderCardProps) {
-  const { token } = useAuthStore();
+  const { token, user } = useAuthStore();
   const [isLoadingTicket, setIsLoadingTicket] = useState(false);
   const [isLoadingInvoice, setIsLoadingInvoice] = useState(false);
+  const [isCanceling, setIsCanceling] = useState(false);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
+  
+  // Debug: verifica los valores completos de la orden
+  console.log("Order data (full):", order);
   
   // Debug: verifica los valores de precios
-  console.log("Order data:", {
+  console.log("Order price data:", {
     orderTotal: order.total,
     items: order.items?.map((item) => ({
       unitPrice: item.order_item.price,
@@ -145,6 +151,95 @@ export function OrderCard({ order }: OrderCardProps) {
       setIsLoadingInvoice(false);
     }
   };
+  
+  // Función para enviar factura por correo electrónico
+  const handleSendInvoiceByEmail = async () => {
+    if (!order.id) {
+      toast.error("No se puede enviar la factura: ID de pedido faltante");
+      return;
+    }
+
+    try {
+      setIsSendingEmail(true);
+      
+      const result = await sendInvoiceByEmail(order.id);
+      
+      if (result.success) {
+        toast.success(result.message);
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error: any) {
+      console.error("Error al enviar factura por correo:", error);
+      const errorMessage = error.response?.data?.error || 
+                          error.message || 
+                          "Error al enviar la factura por correo";
+      toast.error(errorMessage);
+    } finally {
+      setIsSendingEmail(false);
+    }
+  };
+
+  // Función para cancelar el pedido
+  const handleCancelOrder = async () => {
+    if (!user?.id || !order.id) {
+      toast.error("No se puede cancelar el pedido: información de usuario o pedido faltante");
+      return;
+    }
+
+    try {
+      setIsCanceling(true);
+      
+      // Obtener el ID del pago de la orden
+      // Primero intentamos usar el payment_id si existe
+      let payment_id: string = order.id; // Default to order.id as fallback
+      
+      // Si la orden tiene un campo payment_id explícito, lo usamos
+      if (order.payment_id) {
+        payment_id = order.payment_id;
+      } 
+      // Si la orden tiene un campo payments con un array, usamos el id del primer pago
+      else if (order.payments && Array.isArray(order.payments) && order.payments.length > 0) {
+        const paymentObj = order.payments[0];
+        if (paymentObj.id_payments) {
+          payment_id = paymentObj.id_payments;
+        } else if (paymentObj.id) {
+          payment_id = paymentObj.id;
+        }
+        // Si no encontramos un ID de pago, mantenemos el ID de la orden como fallback
+      }
+      
+      console.log("Datos para cancelación:", {
+        order_id: order.id,
+        payment_id: payment_id,
+        user_id: user.id
+      });
+      
+      const result = await cancelOrder({
+        order_id: order.id,
+        payment_id: payment_id,
+        user_id: user.id,
+        cancellation_reason: "Cancelado por el cliente"
+      });
+      
+      if (result.success) {
+        toast.success(result.message);
+        // Aquí podrías actualizar el estado de la orden localmente o recargar los datos
+        window.location.reload(); // Recargar para ver los cambios
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error: any) {
+      console.error("Error al cancelar el pedido:", error);
+      // Mostrar mensaje de error más detallado si está disponible
+      const errorMessage = error.response?.data?.error || 
+                          error.message || 
+                          "Error al cancelar el pedido";
+      toast.error(errorMessage);
+    } finally {
+      setIsCanceling(false);
+    }
+  };
 
   return (
     <Card className="w-full max-w-3xl mx-auto mb-6 shadow-md">
@@ -166,7 +261,9 @@ export function OrderCard({ order }: OrderCardProps) {
         </div>
         <div className="space-y-1 text-sm">
           <p>
-            Estado: <span className="capitalize">{order.status}</span>
+            Estado: <span className="capitalize">
+              {order.status}
+            </span>
           </p>
           <p>
             Método de pago:{" "}
@@ -226,6 +323,28 @@ export function OrderCard({ order }: OrderCardProps) {
         )}
       </CardContent>
       <div className="px-6 pb-4 flex flex-wrap gap-3 justify-end">
+        {/* Mostrar el botón de cancelar si el pedido está en estado pendiente, processing o Completado */}
+        {(order.status === "pending" || order.status === "processing" || order.status === "Completado") && (
+          <Button 
+            onClick={handleCancelOrder} 
+            variant={isCanceling ? "default" : "outline"}
+            size="sm" 
+            className={`flex items-center gap-2 ${isCanceling ? "bg-red-600 hover:bg-red-700 text-white" : "hover:bg-red-100 hover:text-red-700 border-red-200 text-red-600"}`}
+            disabled={isCanceling}
+          >
+            {isCanceling ? (
+              <>
+                <Loader2 size={16} className="animate-spin text-white" />
+                Cancelando pedido...
+              </>
+            ) : (
+              <>
+                <XCircle size={16} />
+                Cancelar pedido
+              </>
+            )}
+          </Button>
+        )}
         <Button 
           onClick={downloadTicket} 
           variant={isLoadingTicket ? "default" : "outline"}
@@ -261,6 +380,25 @@ export function OrderCard({ order }: OrderCardProps) {
             <>
               <FileText size={16} />
               Factura
+            </>
+          )}
+        </Button>
+        <Button 
+          onClick={handleSendInvoiceByEmail} 
+          variant={isSendingEmail ? "default" : "outline"}
+          size="sm" 
+          className={`flex items-center gap-2 ${isSendingEmail ? "bg-green-600 hover:bg-green-700 text-white" : ""}`}
+          disabled={isSendingEmail}
+        >
+          {isSendingEmail ? (
+            <>
+              <Loader2 size={16} className="animate-spin text-white" />
+              Enviando...
+            </>
+          ) : (
+            <>
+              <Mail size={16} />
+              Enviar factura por email
             </>
           )}
         </Button>

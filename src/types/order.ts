@@ -11,9 +11,12 @@ export interface OrderItem {
 export type OrderStatus =
   | "pending"
   | "preparing"
+  | "processing"
   | "ready"
   | "delivered"
-  | "cancelled";
+  | "cancelled"
+  | "Cancelado"
+  | "Completado";
 
 export interface ShippingAddress {
   id?: string; // ID de la dirección (opcional)
@@ -41,6 +44,14 @@ export interface Order {
 
 export interface ProfileOrder {
   id: string;
+  payment_id?: string;
+  payments?: Array<{
+    id?: string;
+    id_payments?: string;
+    order_id?: string;
+    status?: string;
+    stripe_payment_id?: string;
+  }>;
   items: Array<{
     order_item: OrderItem;
     product: {
