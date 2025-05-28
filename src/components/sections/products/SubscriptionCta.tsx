@@ -2,8 +2,50 @@
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useState, FormEvent } from "react";
+import { toast } from "sonner";
+import API from "../../../services/api";
 
 const SubscriptionCta = () => {
+  const [email, setEmail] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    
+    if (!email) {
+      toast.error("Por favor, ingresa tu correo electrónico");
+      return;
+    }
+
+    // Validar formato de correo electrónico
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error("Por favor, ingresa un correo electrónico válido");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await API.post('/subscriptions', { email });
+      const data = response.data;
+
+      toast.success(
+        data.isNew 
+          ? "¡Te has suscrito exitosamente! Revisa tu correo para confirmar." 
+          : "¡Ya estás suscrito! Seguirás recibiendo nuestras novedades."
+      );
+      setEmail("");
+    } catch (error: any) {
+      console.error("Error al suscribirse:", error);
+      const errorMessage = error.response?.data?.message || "Error al procesar tu suscripción";
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <section className="bg-gradient-to-br from-[#f4eadd] to-[#e9dbc5] px-6 md:px-20 py-20">
       <motion.div
@@ -21,18 +63,21 @@ const SubscriptionCta = () => {
           exclusivas.
         </p>
 
-        <form className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+        <form onSubmit={handleSubmit} className="flex flex-col items-center justify-center gap-4 sm:flex-row">
           <Input
             type="email"
             placeholder="Tu correo electrónico"
             required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             className="w-full sm:w-72 bg-white/90 border border-[#c6b89e] rounded-full px-5 py-3 text-sm"
           />
           <Button
             type="submit"
-            className="bg-[#3B2F2F] text-white hover:bg-[#5a4038] rounded-full px-6 py-3 text-sm font-semibold shadow-md"
+            disabled={isLoading}
+            className="bg-[#3B2F2F] text-white hover:bg-[#5a4038] rounded-full px-6 py-3 text-sm font-semibold shadow-md disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            Suscribirme
+            {isLoading ? "Procesando..." : "Suscribirme"}
           </Button>
         </form>
       </motion.div>

@@ -9,6 +9,7 @@ import Blog from "@/pages/public/Blog";
 import Article from "@/pages/public/Article";
 import Subscription from "@/pages/public/Subscription";
 import Cart from "@/pages/private/Cart";
+import UnsubscribePage from "@/pages/UnsubscribePage";
 
 export const publicRoutes = (
   <Route element={<PublicLayout />}>
@@ -20,5 +21,6 @@ export const publicRoutes = (
     <Route path="/blog/:slug" element={<Article />} />
     <Route path="/suscripcion" element={<Subscription />} />
     <Route path="/cart" element={<Cart />} /> {/* 👈 ahora cart es público */}
+    <Route path="/unsubscribe" element={<UnsubscribePage />} />
   </Route>
 );
